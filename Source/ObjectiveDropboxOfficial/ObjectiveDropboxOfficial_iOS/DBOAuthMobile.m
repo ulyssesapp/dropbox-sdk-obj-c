@@ -156,12 +156,13 @@
 		_dismissalHandler = dismissalHandler;
 		_indicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
 		_startURL = URL;
-	}
+
+    self.title = @"Link to Dropbox";
+  }
 	return self;
 }
 - (void)viewDidLoad {
   [super viewDidLoad];
-  self.title = @"Link to Dropbox";
   _webView = [[WKWebView alloc] initWithFrame:self.view.bounds];
   _webView.autoresizingMask = (UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight);
 
