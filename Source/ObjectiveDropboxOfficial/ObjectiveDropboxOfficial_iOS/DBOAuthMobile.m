@@ -182,9 +182,14 @@
   self.navigationItem.rightBarButtonItem = _cancelButton;
 }
 
-- (void)viewWillAppear:(BOOL)animated {
-  [super viewWillAppear:animated];
+- (void)viewDidAppear:(BOOL)animated {
+  [super viewDidAppear:animated];
 
+  // For smaller views, use iPhone user agent to ensure mobile login page is used
+  if (CGRectGetWidth(self.view.bounds) < 600 && UIDevice.currentDevice.userInterfaceIdiom != UIUserInterfaceIdiomPhone) {
+    _webView.customUserAgent = @"Mozilla/5.0 (iPhone; CPU iPhone OS 10_0 like Mac OS X) AppleWebKit/602.1.38 (KHTML, like Gecko) Version/10.0 Mobile/14A300 Safari/602.1";
+  }
+  
   if (![_webView canGoBack]) {
     if (_startURL != nil) {
       [self loadURL:_startURL];
