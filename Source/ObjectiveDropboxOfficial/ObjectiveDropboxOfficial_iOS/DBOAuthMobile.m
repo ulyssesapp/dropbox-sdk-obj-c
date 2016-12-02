@@ -163,8 +163,10 @@
   [super viewDidLoad];
   self.title = @"Link to Dropbox";
   _webView = [[WKWebView alloc] initWithFrame:self.view.bounds];
+  _webView.autoresizingMask = (UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight);
 
   _indicator.center = self.view.center;
+  _indicator.autoresizingMask = (UIViewAutoresizingFlexibleLeftMargin|UIViewAutoresizingFlexibleRightMargin|UIViewAutoresizingFlexibleTopMargin|UIViewAutoresizingFlexibleBottomMargin);
   [_webView addSubview:_indicator];
   [_indicator startAnimating];
 
