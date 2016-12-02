@@ -30,14 +30,23 @@
 @implementation DropboxClientsManager (MobileAuth)
 
 + (void)authorizeFromController:(UIApplication *)sharedApplication
-                     controller:(UIViewController *)controller
-                        openURL:(void (^_Nonnull)(NSURL *))openURL
-                    browserAuth:(BOOL)browserAuth {
-  NSAssert([DBOAuthManager sharedOAuthManager] != nil,
-           @"Call `Dropbox.setupWithAppKey` or `Dropbox.setupWithTeamAppKey` before calling this method");
-  DBMobileSharedApplication *sharedMobileApplication =
-      [[DBMobileSharedApplication alloc] init:sharedApplication controller:controller openURL:openURL];
-  [[DBOAuthManager sharedOAuthManager] authorizeFromSharedApplication:sharedMobileApplication browserAuth:browserAuth];
+										 controller:(UIViewController *)controller
+												openURL:(void (^_Nonnull)(NSURL *))openURL
+										browserAuth:(BOOL)browserAuth {
+	[self authorizeFromController:sharedApplication controller:controller openURL:openURL presentationHandler:nil dismissalHandler:nil browserAuth:browserAuth];
+}
+
++ (void)authorizeFromController:(UIApplication *)sharedApplication
+										 controller:(UIViewController *)controller
+												openURL:(void (^_Nonnull)(NSURL *))openURL
+						presentationHandler:(void (^_Nullable)(UIViewController * _Nonnull))presentationHandler
+							 dismissalHandler:(void (^_Nullable)(BOOL, UIViewController * _Nonnull))dismissalHandler
+										browserAuth:(BOOL)browserAuth {
+	NSAssert([DBOAuthManager sharedOAuthManager] != nil,
+					 @"Call `Dropbox.setupWithAppKey` or `Dropbox.setupWithTeamAppKey` before calling this method");
+	DBMobileSharedApplication *sharedMobileApplication =
+	[[DBMobileSharedApplication alloc] init:sharedApplication controller:controller openURL:openURL presentationHandler:presentationHandler dismissalHandler:dismissalHandler];
+	[[DBOAuthManager sharedOAuthManager] authorizeFromSharedApplication:sharedMobileApplication browserAuth:browserAuth];
 }
 
 + (void)setupWithAppKey:(NSString *)appKey {

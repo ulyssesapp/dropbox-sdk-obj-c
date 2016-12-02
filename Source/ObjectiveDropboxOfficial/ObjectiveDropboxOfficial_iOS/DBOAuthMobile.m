@@ -12,6 +12,8 @@
 @property (nonatomic, readonly) UIApplication * _Nullable sharedApplication;
 @property (nonatomic, readonly) UIViewController * _Nullable controller;
 @property (nonatomic, readonly, nullable) void (^openURL)(NSURL * _Nullable);
+@property (nonatomic, readonly, nullable) void (^presentationHandler)(UIViewController * _Nonnull);
+@property (nonatomic, readonly, nullable) void (^dismissalHandler)(BOOL, UIViewController * _Nonnull);
 
 @end
 
@@ -20,14 +22,24 @@
 - (instancetype)init:(UIApplication *)sharedApplication
           controller:(UIViewController *)controller
              openURL:(void (^)(NSURL *))openURL {
-  self = [super init];
-  if (self) {
-    // fields saved for app-extension safety
-    _sharedApplication = sharedApplication;
-    _controller = controller;
-    _openURL = openURL;
-  }
-  return self;
+  return [self init:sharedApplication controller:controller openURL:openURL presentationHandler:nil dismissalHandler:nil];
+}
+
+- (instancetype)init:(UIApplication *)sharedApplication
+					controller:(UIViewController *)controller
+						 openURL:(void (^)(NSURL *))openURL
+ presentationHandler:(void (^_Nullable)(UIViewController * _Nonnull))presentationHandler
+		dismissalHandler:(void(^_Nullable)(BOOL, UIViewController * _Nonnull))dismissalHandler {
+	self = [super init];
+	if (self) {
+		// fields saved for app-extension safety
+		_sharedApplication = sharedApplication;
+		_controller = controller;
+		_openURL = openURL;
+		_presentationHandler = presentationHandler;
+		_dismissalHandler = dismissalHandler;
+	}
+	return self;
 }
 
 - (void)presentErrorMessage:(NSString *)message title:(NSString *)title {
@@ -72,17 +84,22 @@
 }
 
 - (void)presentWebViewAuth:(NSURL * _Nonnull)authURL
-       tryInterceptHandler:(BOOL (^_Nonnull)(NSURL * _Nonnull))tryInterceptHandler
-             cancelHandler:(void (^_Nonnull)(void))cancelHandler {
-  DBMobileWebViewController *webViewController = [[DBMobileWebViewController alloc] init:authURL
-                                                                     tryInterceptHandler:tryInterceptHandler
-                                                                           cancelHandler:cancelHandler];
+			 tryInterceptHandler:(BOOL (^_Nonnull)(NSURL * _Nonnull))tryInterceptHandler
+						 cancelHandler:(void (^_Nonnull)(void))cancelHandler {
+	DBMobileWebViewController *webViewController = [[DBMobileWebViewController alloc] init:authURL
+																																		 tryInterceptHandler:tryInterceptHandler
+																																					 cancelHandler:cancelHandler
+																																				dismissalHandler:_dismissalHandler];
+	
+	if (_presentationHandler) {
+		_presentationHandler(webViewController);
+	} else {
   UINavigationController *navigationController =
-      [[UINavigationController alloc] initWithRootViewController:webViewController];
-
+		[[UINavigationController alloc] initWithRootViewController:webViewController];
+		
   [_controller presentViewController:navigationController animated:YES completion:nil];
+	}
 }
-
 - (void)presentBrowserAuth:(NSURL * _Nonnull)authURL {
   [self presentExternalApp:authURL];
 }
@@ -104,6 +121,7 @@
 @property (nonatomic, readonly) WKWebView * _Nullable webView;
 @property (nonatomic, readonly, nullable) void (^onWillDismiss)(BOOL);
 @property (nonatomic, readonly, nullable) BOOL (^tryInterceptHandler)(NSURL * _Nullable);
+@property (nonatomic, readonly, nullable) void (^dismissalHandler)(BOOL, UIViewController * _Nonnull);
 @property (nonatomic, readonly) UIBarButtonItem * _Nullable cancelButton;
 @property (nonatomic, readonly, nullable) void (^cancelHandler)(void);
 @property (nonatomic, readonly) UIActivityIndicatorView * _Nullable indicator;
@@ -122,25 +140,25 @@
 }
 
 - (instancetype)init:(NSURL *)URL
-    tryInterceptHandler:(BOOL (^)(NSURL *))tryInterceptHandler
-          cancelHandler:(void (^)(void))cancelHandler {
-  self = [super initWithNibName:nil bundle:nil];
-  if (self) {
-    _tryInterceptHandler = tryInterceptHandler;
-    _cancelHandler = cancelHandler;
-    _indicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
-    _startURL = URL;
-
-    // clear any persistent cookies
-    NSString *libraryPath =
-        [NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES) objectAtIndex:0];
-    NSString *cookiesFolderPath = [libraryPath stringByAppendingString:@"/Cookies"];
-    NSError *errors;
-    [[NSFileManager defaultManager] removeItemAtPath:cookiesFolderPath error:&errors];
-  }
-  return self;
+ tryInterceptHandler:(BOOL (^)(NSURL *))tryInterceptHandler
+			 cancelHandler:(void (^)(void))cancelHandler {
+	return [self init:URL tryInterceptHandler:tryInterceptHandler cancelHandler:cancelHandler];
 }
 
+- (instancetype)init:(NSURL *)URL
+ tryInterceptHandler:(BOOL (^)(NSURL *))tryInterceptHandler
+			 cancelHandler:(void (^)(void))cancelHandler
+		dismissalHandler:(void(^_Nullable)(BOOL, UIViewController * _Nonnull))dismissalHandler {
+	self = [super initWithNibName:nil bundle:nil];
+	if (self) {
+		_tryInterceptHandler = tryInterceptHandler;
+		_cancelHandler = cancelHandler;
+		_dismissalHandler = dismissalHandler;
+		_indicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
+		_startURL = URL;
+	}
+	return self;
+}
 - (void)viewDidLoad {
   [super viewDidLoad];
   self.title = @"Link to Dropbox";
@@ -229,9 +247,12 @@
   if (_onWillDismiss) {
     _onWillDismiss(asCancel);
   }
-  if (self.presentingViewController) {
-    [self.presentingViewController dismissViewControllerAnimated:animated completion:nil];
-  }
+	if (self.dismissalHandler) {
+		self.dismissalHandler(!asCancel, self);
+	}
+	else if (self.presentingViewController) {
+		[self.presentingViewController dismissViewControllerAnimated:animated completion:nil];
+	}
 }
 
 @end

@@ -40,6 +40,33 @@
                     browserAuth:(BOOL)browserAuth;
 
 ///
+/// Commences OAuth mobile flow from supplied view controller.
+///
+/// @param sharedApplication The `UIApplication` with which to render the
+/// OAuth flow.
+/// @param controller The `UIViewController` with which to render the OAuth
+/// flow.
+/// @param openURL A wrapper around app-extension unsafe `openURL` call.
+/// @param presentationHandler Block to set up the passed view controller
+/// for presentation.
+/// @param dismissalHandler Block to handle dissmissal of the passed view
+/// controller.
+/// @param browserAuth Whether to use an external web-browser to perform
+/// authorization. If set to false, then an in-app webview will be used
+/// to facilitate the auth flow. The advantage of browser auth is it is
+/// safer for the end user and it can leverage existing session information,
+/// which might mean the end user can avoid re-entering their Dropbox login
+/// credentials. The disadvantage of browser auth is it requires navigating
+/// outside of the current app.
+///
++ (void)authorizeFromController:(UIApplication * _Nonnull)sharedApplication
+					 controller:(UIViewController * _Nonnull)controller
+						openURL:(void (^_Nonnull)(NSURL * _Nonnull))openURL
+			presentationHandler:(void (^_Nonnull)(UIViewController * _Nonnull))presentationHandler
+			   dismissalHandler:(void(^_Nonnull)(BOOL, UIViewController * _Nonnull))dismissalHandler
+					browserAuth:(BOOL)browserAuth;
+
+///
 /// Initializes a `DropboxClient` shared instance with the supplied app key.
 ///
 /// This method should be used in the single Dropbox user case. If any stored OAuth
