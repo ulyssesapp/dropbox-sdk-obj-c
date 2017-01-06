@@ -14,7 +14,7 @@ version_regex="[0-9]+\.[0-9]+\.[0-9]+"
 
 podspec=./ObjectiveDropboxOfficial.podspec
 readme=./README.md
-user_agent=./Source/ObjectiveDropboxOfficial/Shared/Handwritten/Networking/DBTransportClient.m
+user_agent=./Source/ObjectiveDropboxOfficial/Shared/Handwritten/Networking/DBTransportClientBase.m
 ios_version=Source/ObjectiveDropboxOfficial/ObjectiveDropboxOfficial_iOS/Info.plist
 mac_version=Source/ObjectiveDropboxOfficial/ObjectiveDropboxOfficial_macOS/Info.plist
 
@@ -24,6 +24,9 @@ if ! [[ $1 =~ $arg_version_regex ]]; then
 else
     echo "Updating SDK text to version \"$1\""
 fi
+
+echo
+echo
 
 echo "Replacing podspec version number..."
 sed -i '' -E "s/s.version      = '$version_regex'/s.version      = '$1'/" $podspec

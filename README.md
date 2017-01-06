@@ -127,7 +127,7 @@ brew install carthage
 
 ```
 # ObjectiveDropboxOfficial
-github "https://github.com/dropbox/dropbox-sdk-obj-c" ~> 2.0.2
+github "https://github.com/dropbox/dropbox-sdk-obj-c" ~> 2.0.5
 ```
 
 Then, run the following command to checkout and build the Dropbox Objective-C SDK repository:
@@ -339,7 +339,19 @@ To handle the redirection back into the Objective-C SDK once the authentication 
     }
     return NO;
 }
+```
 
+For iOS targets >= 9, use:
+
+```objective-c
+#import <ObjectiveDropboxOfficial/ObjectiveDropboxOfficial.h>
+
+- (BOOL)application:(UIApplication *)app openURL:(NSURL *)url
+            options:(NSDictionary<UIApplicationOpenURLOptionsKey,id> *)options {
+    DBOAuthResult *authResult = [DropboxClientsManager handleRedirectURL:url];
+    ....
+    ....
+}
 ```
 
 ##### macOS
@@ -432,7 +444,7 @@ Response handlers are required for all endpoints. Progress handlers, on the othe
 #### RPC-style request
 ```objective-c
 [[client.filesRoutes createFolder:@"/test/path"]
-    response:^(DBFILESFolderMetadata *result, DBFILESCreateFolderError *routeError, DBError *error) {
+    response:^(DBFILESFolderMetadata *result, DBFILESCreateFolderError *routeError, DBRequestError *error) {
         if (result) {
             NSLog(@"%@\n", result);
         } else {
@@ -447,7 +459,7 @@ Response handlers are required for all endpoints. Progress handlers, on the othe
 ```objective-c
 NSData *fileData = [@"file data example" dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:NO];
 [[[client.filesRoutes uploadData:@"/test/path/in/Dropbox/account" inputData:fileData]
-    response:^(DBFILESFileMetadata *result, DBFILESUploadError *routeError, DBError *error) {
+    response:^(DBFILESFileMetadata *result, DBFILESUploadError *routeError, DBRequestError *error) {
         if (result) {
             NSLog(@"%@\n", result);
         } else {
@@ -469,7 +481,7 @@ DBFILESCommitInfo *commitInfo =
                             queue:nil
                     progressBlock:^(int64_t uploaded, int64_t total, int64_t expectedTotal) {
     NSLog(@"Uploaded: %lld  UploadedTotal: %lld  ExpectedToUploadTotal: %lld", uploaded, total, expectedTotal);
-} responseBlock:^(DBFILESUploadSessionFinishBatchJobStatus *result, DBASYNCPollError *routeError, DBError *error) {
+} responseBlock:^(DBFILESUploadSessionFinishBatchJobStatus *result, DBASYNCPollError *routeError, DBRequestError *error) {
     if (result) {
       NSLog(@"%@\n", result);
     } else {
@@ -489,7 +501,7 @@ NSFileManager *fileManager = [NSFileManager defaultManager];
 NSURL *outputDirectory = [fileManager URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask][0];
 NSURL *outputUrl = [outputDirectory URLByAppendingPathComponent:@"test_file_output.txt"];
 [[[client.filesRoutes downloadUrl:@"/test/path/in/Dropbox/account" overwrite:YES destination:outputUrl]
-    response:^(DBFILESFileMetadata *result, DBFILESDownloadError *routeError, DBError *error, NSURL *destination) {
+    response:^(DBFILESFileMetadata *result, DBFILESDownloadError *routeError, DBRequestError *error, NSURL *destination) {
         if (result) {
             NSLog(@"%@\n", result);
             NSData *data = [[NSFileManager defaultManager] contentsAtPath:[destination path]];
@@ -505,7 +517,7 @@ NSURL *outputUrl = [outputDirectory URLByAppendingPathComponent:@"test_file_outp
 
 // Download to NSData
 [[[client.filesRoutes downloadData:@"/test/path"]
-    response:^(DBFILESFileMetadata *result, DBFILESDownloadError *routeError, DBError *error, NSData *fileContents) {
+    response:^(DBFILESFileMetadata *result, DBFILESDownloadError *routeError, DBRequestError *error, NSData *fileContents) {
         if (result) {
             NSLog(@"%@\n", result);
             NSString *dataStr = [[NSString alloc]initWithData:fileContents encoding:NSUTF8StringEncoding];
@@ -543,7 +555,7 @@ If at run time you attempt to access a union instance field that is not associat
 #### Route-specific errors
 ```objective-c
 [[client.filesRoutes delete_:@"/test/path"]
-    response:^(DBFILESMetadata *result, DBFILESDeleteError *routeError, DBError *error) {
+    response:^(DBFILESMetadata *result, DBFILESDeleteError *routeError, DBRequestError *error) {
         if (result) {
             NSLog(@"%@\n", result);
         } else {
@@ -570,14 +582,14 @@ If at run time you attempt to access a union instance field that is not associat
 
 #### Generic network request errors
 
-In the case of a network error, regardless of whether the error is specific to the route, a generic `DBError` type will always be returned, which includes information like Dropbox request ID and HTTP status code.
+In the case of a network error, regardless of whether the error is specific to the route, a generic `DBRequestError` type will always be returned, which includes information like Dropbox request ID and HTTP status code.
 
-The `DBError` type is a special union type which is similar to the standard API v2 union type, but also includes a collection of `as<TAG_STATE>` methods, each of which returns a new instance of a particular error subtype.
+The `DBRequestError` type is a special union type which is similar to the standard API v2 union type, but also includes a collection of `as<TAG_STATE>` methods, each of which returns a new instance of a particular error subtype.
 As with accessing associated values in regular unions, the `as<TAG_STATE>` should only be called after the corresponding `is<TAG_STATE>` method returns true. See below:
 
 ```objective-c
 [[client.filesRoutes delete_:@"/test/path"]
-    response:^(DBFILESMetadata *result, DBFILESDeleteError *routeError, DBError *error) {
+    response:^(DBFILESMetadata *result, DBFILESDeleteError *routeError, DBRequestError *error) {
         if (result) {
             NSLog(@"%@\n", result);
         } else {
@@ -627,7 +639,7 @@ To determine at runtime which subtype the `Metadata` type exists as, perform an 
 
 ```objective-c
 [[client.filesRoutes delete_:@"/test/path"]
-    response:^(DBFILESMetadata *result, DBFILESDeleteError *routeError, DBError *error) {
+    response:^(DBFILESMetadata *result, DBFILESDeleteError *routeError, DBRequestError *error) {
         if (result) {
             if ([result isKindOfClass:[DBFILESFileMetadata class]]) {
                 DBFILESFileMetadata *fileMetadata = (DBFILESFileMetadata *)result;
@@ -701,7 +713,7 @@ By default, response/progress handler code runs on the main thread. You can set 
 
 ```objective-c
 [[client.filesRoutes listFolder:@""]
-    response:[NSOperationQueue new] response:^(DBFILESListFolderResult *result, DBFILESListFolderError *routeError, DBError *error) {
+    response:[NSOperationQueue new] response:^(DBFILESListFolderResult *result, DBFILESListFolderError *routeError, DBRequestError *error) {
         if (result) {
           NSLog(@"%@", [NSThread currentThread]);  // Output: <NSThread: 0x600000261480>{number = 5, name = (null)}
           NSLog(@"%@", [NSThread mainThread]);     // Output: <NSThread: 0x618000062bc0>{number = 1, name = (null)}
