@@ -1925,7 +1925,6 @@
 		F2E37CCC1DF9EE5D001A5E94 /* DropboxClientsManager+MobileAuth.h in Headers */ = {isa = PBXBuildFile; fileRef = F2E37CC61DF9EE5D001A5E94 /* DropboxClientsManager+MobileAuth.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		F2E37CCD1DF9EE5D001A5E94 /* DropboxClientsManager+MobileAuth.m in Sources */ = {isa = PBXBuildFile; fileRef = F2E37CC71DF9EE5D001A5E94 /* DropboxClientsManager+MobileAuth.m */; };
 		F2E37CCE1DF9EE5D001A5E94 /* DropboxSDKImportsMobile.h in Headers */ = {isa = PBXBuildFile; fileRef = F2E37CC81DF9EE5D001A5E94 /* DropboxSDKImportsMobile.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		F2E37CCF1DF9EE5D001A5E94 /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = F2E37CC91DF9EE5D001A5E94 /* Info.plist */; };
 		F2E37CD71DF9EE64001A5E94 /* DBOAuthDesktop.h in Headers */ = {isa = PBXBuildFile; fileRef = F2E37CD11DF9EE64001A5E94 /* DBOAuthDesktop.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		F2E37CD81DF9EE64001A5E94 /* DBOAuthDesktop.m in Sources */ = {isa = PBXBuildFile; fileRef = F2E37CD21DF9EE64001A5E94 /* DBOAuthDesktop.m */; };
 		F2E37CD91DF9EE64001A5E94 /* DropboxClientsManager+DesktopAuth.h in Headers */ = {isa = PBXBuildFile; fileRef = F2E37CD31DF9EE64001A5E94 /* DropboxClientsManager+DesktopAuth.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -5170,7 +5169,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F2E37CCF1DF9EE5D001A5E94 /* Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
