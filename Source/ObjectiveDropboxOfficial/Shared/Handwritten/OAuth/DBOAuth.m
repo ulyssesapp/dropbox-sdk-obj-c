@@ -78,7 +78,7 @@ static DBSDKReachability *internetReachableFoo;
     NSString *message = @"Try again once you have an internet connection.";
     NSString *title = @"No internet connection";
 
-    NSDictionary<NSString *, void (^)()> *buttonHandlers =
+    NSDictionary<NSString *, void (^)(void)> *buttonHandlers =
         @{ @"Retry" : ^void(){
                [self authorizeFromSharedApplication:sharedApplication browserAuth:browserAuth];
   }
@@ -121,7 +121,7 @@ if (browserAuth) {
     }
   };
 
-  void (^cancelHandler)() = ^void() {
+  void (^cancelHandler)(void) = ^void() {
     NSURL *cancelUrl = [NSURL URLWithString:[NSString stringWithFormat:@"db-%@://2/cancel", _appKey]];
     [sharedApplication presentExternalApp:cancelUrl];
   };

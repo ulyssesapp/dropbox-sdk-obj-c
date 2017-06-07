@@ -264,7 +264,7 @@ static const int timeoutInSec = 200;
                  shouldClose:(BOOL)shouldClose
         fileChunkInputStream:(NSInputStream *)fileChunkInputStream
     chunkUploadResponseQueue:(NSOperationQueue *)chunkUploadResponseQueue
-         chunkUploadFinished:(dispatch_semaphore_t *)chunkUploadFinished
+         chunkUploadFinished:(dispatch_semaphore_t __autoreleasing *)chunkUploadFinished
                   retryCount:(int)retryCount {
   // close session on final append call
   __block DBUploadTask *task = [

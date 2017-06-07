@@ -56,7 +56,7 @@
 
 - (void)presentErrorMessageWithHandlers:(NSString * _Nonnull)message
                                   title:(NSString * _Nonnull)title
-                         buttonHandlers:(NSDictionary<NSString *, void (^)()> * _Nonnull)buttonHandlers {
+                         buttonHandlers:(NSDictionary<NSString *, void (^)(void)> * _Nonnull)buttonHandlers {
   UIAlertController *alertController =
       [UIAlertController alertControllerWithTitle:title
                                           message:message
