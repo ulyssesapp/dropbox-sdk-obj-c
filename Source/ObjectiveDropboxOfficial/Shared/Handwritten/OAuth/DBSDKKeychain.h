@@ -25,4 +25,7 @@
 /// Deletes all key / value pairs in the keychain.
 + (BOOL)clear;
 
+/// Migrates all key / value pairs in the keychain from the bundle identifier.
++ (void)migrateAllFromBundleIdentifier:(NSString *)bundleIdentifier;
+
 @end

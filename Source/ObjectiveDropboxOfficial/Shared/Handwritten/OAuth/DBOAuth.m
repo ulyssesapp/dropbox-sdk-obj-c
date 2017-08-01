@@ -253,6 +253,10 @@ if (browserAuth) {
   return [DBSDKKeychain clear];
 }
 
+- (void)migrateAccessTokensFromBundleIdentifier:(NSString *)bundleIdentifier {
+	[DBSDKKeychain migrateAllFromBundleIdentifier:bundleIdentifier];
+}
+
 @end
 
 #pragma mark - OAuth manager base (macOS)
