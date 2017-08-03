@@ -71,7 +71,7 @@
 
 + (BOOL)clear {
   NSMutableDictionary<NSString *, id> *query = [DBSDKKeychain queryWithDict:@{}];
-  return SecItemDelete((__brid ge CFDictionaryRef)query) == noErr;
+  return SecItemDelete((__bridge CFDictionaryRef)query) == noErr;
 }
 
 + (void)migrateAllFromBundleIdentifier:(NSString *)bundleIdentifier {
