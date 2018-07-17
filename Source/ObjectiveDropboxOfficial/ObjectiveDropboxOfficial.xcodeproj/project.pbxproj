@@ -1934,7 +1934,7 @@
 
 /* Begin PBXFileReference section */
 		F26B75751D7F6AF700714F70 /* ObjectiveDropboxOfficial.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = ObjectiveDropboxOfficial.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		F27DE9E21D7FF909003B1CEE /* ObjectiveDropboxOfficial.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = ObjectiveDropboxOfficial.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		F27DE9E21D7FF909003B1CEE /* ObjectiveDropboxOfficial-macOS.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = "ObjectiveDropboxOfficial-macOS.framework"; sourceTree = BUILT_PRODUCTS_DIR; };
 		F27DEB991D7FFBB9003B1CEE /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk/System/Library/Frameworks/AppKit.framework; sourceTree = DEVELOPER_DIR; };
 		F27DEB9B1D7FFBBF003B1CEE /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 		F29AFA7A1D7FF0220043800A /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -2946,7 +2946,7 @@
 			isa = PBXGroup;
 			children = (
 				F26B75751D7F6AF700714F70 /* ObjectiveDropboxOfficial.framework */,
-				F27DE9E21D7FF909003B1CEE /* ObjectiveDropboxOfficial.framework */,
+				F27DE9E21D7FF909003B1CEE /* ObjectiveDropboxOfficial-macOS.framework */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -5123,7 +5123,7 @@
 			);
 			name = "ObjectiveDropboxOfficial macOS";
 			productName = ObjectiveDropboxOfficial_macOS;
-			productReference = F27DE9E21D7FF909003B1CEE /* ObjectiveDropboxOfficial.framework */;
+			productReference = F27DE9E21D7FF909003B1CEE /* ObjectiveDropboxOfficial-macOS.framework */;
 			productType = "com.apple.product-type.framework";
 		};
 /* End PBXNativeTarget section */
@@ -6321,7 +6321,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				PRODUCT_BUNDLE_IDENTIFIER = com.dropbox.ObjectiveDropboxOfficial;
-				PRODUCT_NAME = ObjectiveDropboxOfficial;
+				PRODUCT_NAME = "ObjectiveDropboxOfficial-macOS";
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
 			};
@@ -6344,7 +6344,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				PRODUCT_BUNDLE_IDENTIFIER = com.dropbox.ObjectiveDropboxOfficial;
-				PRODUCT_NAME = ObjectiveDropboxOfficial;
+				PRODUCT_NAME = "ObjectiveDropboxOfficial-macOS";
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
 			};
