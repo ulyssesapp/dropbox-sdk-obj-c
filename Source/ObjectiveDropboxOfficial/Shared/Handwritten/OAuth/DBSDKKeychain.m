@@ -22,11 +22,7 @@
 }
 
 + (NSString *)get:(NSString *)key {
-	return [self get:key forBundleIdentifier:self.mainBundleIdentifier];
-}
-
-+ (NSString *)get:(NSString *)key forBundleIdentifier:(NSString *)bundleIdentifier {
-  NSData *data = [self getAsData:key forBundleIdentifier:bundleIdentifier];
+  NSData *data = [self getAsData:key];
   if (data != nil) {
     return [NSString stringWithUTF8String:[data bytes]];
   } else {
@@ -35,14 +31,10 @@
 }
 
 + (NSArray<NSString *> *)getAll {
-	return [self getAllForBundleIdentifier:self.mainBundleIdentifier];
-}
-
-+ (NSArray<NSString *> *)getAllForBundleIdentifier:(NSString *)bundleIdentifier {
   NSMutableDictionary<NSString *, id> *query = [DBSDKKeychain queryWithDict:@{
     (NSString *)kSecReturnAttributes : (id)kCFBooleanTrue,
     (NSString *)kSecMatchLimit : (id)kSecMatchLimitAll
-  } bundleIdentifier:bundleIdentifier];
+  }];
 
   CFDataRef dataResult = nil;
   OSStatus status = SecItemCopyMatching((__bridge CFDictionaryRef)query, (CFTypeRef *)&dataResult);
@@ -61,12 +53,8 @@
 }
 
 + (BOOL)delete:(NSString *)key {
-	return [self delete:key forBundleIdentifier:self.mainBundleIdentifier];
-}
-
-+ (BOOL)delete:(NSString *)key forBundleIdentifier:(NSString *)bundleIdentifier {
-	NSMutableDictionary<NSString *, id> *query = [DBSDKKeychain queryWithDict:@{(id)kSecAttrAccount : key} bundleIdentifier:bundleIdentifier];
-	return SecItemDelete((__bridge CFDictionaryRef)query) == noErr;
+  NSMutableDictionary<NSString *, id> *query = [DBSDKKeychain queryWithDict:@{(id)kSecAttrAccount : key}];
+  return SecItemDelete((__bridge CFDictionaryRef)query) == noErr;
 }
 
 + (BOOL)clear {
@@ -95,12 +83,12 @@
   return SecItemAdd((__bridge CFDictionaryRef)query, nil) == noErr;
 }
 
-+ (NSData *)getAsData:(NSString *)key forBundleIdentifier:(NSString *)bundleIdentifier {
++ (NSData *)getAsData:(NSString *)key {
   NSMutableDictionary<NSString *, id> *query = [DBSDKKeychain queryWithDict:@{
     (id)kSecAttrAccount : key,
     (id)kSecReturnData : (id)kCFBooleanTrue,
     (id)kSecMatchLimit : (id)kSecMatchLimitOne
-  } bundleIdentifier:bundleIdentifier];
+  }];
 
   CFDataRef dataResult = NULL;
   OSStatus status = SecItemCopyMatching((__bridge CFDictionaryRef)query, (CFTypeRef *)&dataResult);
@@ -112,12 +100,8 @@
 }
 
 + (NSMutableDictionary<NSString *, id> *)queryWithDict:(NSDictionary<NSString *, id> *)query {
-	return [self queryWithDict:query bundleIdentifier:self.mainBundleIdentifier];
-}
-
-+ (NSMutableDictionary<NSString *, id> *)queryWithDict:(NSDictionary<NSString *, id> *)query bundleIdentifier:(NSString *)bundleIdentifier {
   NSMutableDictionary<NSString *, id> *queryResult = [query mutableCopy];
-  NSString *bundleId = bundleIdentifier ?: @"";
+  NSString *bundleId = [NSBundle mainBundle].bundleIdentifier ?: @"";
 
   [queryResult setObject:(id)kSecClassGenericPassword forKey:(NSString *)kSecClass];
   [queryResult setObject:(id)[NSString stringWithFormat:@"%@.dropbox.authv2", bundleId]
@@ -127,18 +111,13 @@
   return queryResult;
 }
 
-+ (NSString *)mainBundleIdentifier
-{
-	return [NSBundle mainBundle].bundleIdentifier;
-}
-
 + (BOOL)checkAccessibilityMigration {
   NSUserDefaults *Defaults = [NSUserDefaults standardUserDefaults];
   BOOL MigrationOccured = [[Defaults stringForKey:@"KeychainAccessibilityMigration"] boolValue];
 
   if (!MigrationOccured) {
     NSMutableDictionary<NSString *, id> *query = [NSMutableDictionary new];
-    NSString *bundleId = self.mainBundleIdentifier ?: @"";
+    NSString *bundleId = [NSBundle mainBundle].bundleIdentifier ?: @"";
     [query setObject:(id)kSecClassGenericPassword forKey:(NSString *)kSecClass];
     [query setObject:(id)[NSString stringWithFormat:@"%@.dropbox.authv2", bundleId]
                     forKey:(NSString *)kSecAttrService];
