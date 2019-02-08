@@ -133,12 +133,6 @@
 ///
 - (BOOL)clearStoredAccessToken:(DBAccessToken * _Nonnull)token;
 
-
-///
-/// Migrates all stored access tokens in the `DBKeychain` class.
-///
-- (void)migrateAccessTokensFromBundleIdentifier:(NSString * _Nonnull)bundleIdentifier;
-
 ///
 /// Deletes all stored access tokens in the `DBKeychain` class.
 ///
