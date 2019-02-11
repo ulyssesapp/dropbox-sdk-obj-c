@@ -62,18 +62,6 @@
   return SecItemDelete((__bridge CFDictionaryRef)query) == noErr;
 }
 
-+ (void)migrateAllFromBundleIdentifier:(NSString *)bundleIdentifier {
-	NSArray<NSString *> *allKeys = [self getAllForBundleIdentifier:bundleIdentifier];
-	
-	for (NSString *key in allKeys) {
-		NSString *value = [self get:key forBundleIdentifier:bundleIdentifier];
-		if (!value)
-			continue;
-		
-		[self set:key value:value];
-	}
-}
-
 + (BOOL)setWithData:(NSString *)key value:(NSData *)value {
   NSMutableDictionary<NSString *, id> *query =
       [DBSDKKeychain queryWithDict:@{(id)kSecAttrAccount : key, (id)kSecValueData : value}];
