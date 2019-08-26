@@ -20,7 +20,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface DBMobileSharedApplication : NSObject <DBSharedApplication>
 
 ///
-/// Full constructor.
+/// Convenience constructor.
 ///
 /// @param sharedApplication The `UIApplication` with which to render the OAuth flow.
 /// @param controller The `UIViewController` with which to render the OAuth flow.
@@ -29,14 +29,36 @@ NS_ASSUME_NONNULL_BEGIN
 /// @return An initialized instance.
 ///
 - (instancetype)initWithSharedApplication:(UIApplication *)sharedApplication
+							   controller:(UIViewController *)controller
+								  openURL:(void (^_Nonnull)(NSURL *))openURL;
+
+///
+/// Full constructor.
+///
+/// @param sharedApplication The `UIApplication` with which to render the
+/// OAuth flow.
+/// @param controller The `UIViewController` with which to render the OAuth
+/// flow.
+/// @param openURL A wrapper around app-extension unsafe `openURL` call.
+/// @param presentationHandler Block to set up the passed view controller
+/// for presentation.
+/// @param dismissalHandler Block to handle dissmissal of the passed view
+/// controller.
+///
+/// @return An initialized instance.
+///
+- (instancetype)initWithSharedApplication:(UIApplication *)sharedApplication
                                controller:(UIViewController *)controller
-                                  openURL:(void (^_Nonnull)(NSURL *))openURL;
+                                  openURL:(void (^_Nonnull)(NSURL *))openURL
+					  presentationHandler:(void (^_Nullable)(UIViewController *))presentationHandler
+						 dismissalHandler:(void (^_Nullable)(BOOL, UIViewController *))dismissalHandler
+						   useBrowserAuth:(BOOL)useBrowserAuth;
 
 + (nullable DBMobileSharedApplication *)mobileSharedApplication;
 
 + (void)setMobileSharedApplication:(DBMobileSharedApplication *)mobileSharedApplication;
 
-- (void)dismissAuthController;
+- (void)dismissAuthControllerWithSuccess:(BOOL)success;
 
 @end
 

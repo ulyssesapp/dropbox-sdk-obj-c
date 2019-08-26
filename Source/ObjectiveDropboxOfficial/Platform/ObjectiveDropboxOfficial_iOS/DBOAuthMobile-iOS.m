@@ -14,6 +14,9 @@ static DBMobileSharedApplication *s_mobileSharedApplication;
   UIApplication *_sharedApplication;
   UIViewController *_controller;
   void (^_openURL)(NSURL *);
+  void (^_presentationHandler)(UIViewController *);
+  void (^_dismissalHandler)(BOOL, UIViewController *);
+  BOOL _useBrowserAuth;
 }
 
 + (DBMobileSharedApplication *)mobileSharedApplication {
@@ -27,14 +30,26 @@ static DBMobileSharedApplication *s_mobileSharedApplication;
 - (instancetype)initWithSharedApplication:(UIApplication *)sharedApplication
                                controller:(UIViewController *)controller
                                   openURL:(void (^)(NSURL *))openURL {
-  self = [super init];
-  if (self) {
-    // fields saved for app-extension safety
-    _sharedApplication = sharedApplication;
-    _controller = controller;
-    _openURL = openURL;
-  }
-  return self;
+	return [self initWithSharedApplication:sharedApplication controller:controller openURL:openURL presentationHandler:nil dismissalHandler:nil useBrowserAuth:NO];
+}
+
+- (instancetype)initWithSharedApplication:(UIApplication *)sharedApplication
+							   controller:(UIViewController *)controller
+								  openURL:(void (^)(NSURL * _Nonnull))openURL
+					  presentationHandler:(void (^)(UIViewController *))presentationHandler
+						 dismissalHandler:(void (^)(BOOL, UIViewController *))dismissalHandler
+						   useBrowserAuth:(BOOL)useBrowserAuth {
+	self = [super init];
+	if (self) {
+		// fields saved for app-extension safety
+		_sharedApplication = sharedApplication;
+		_controller = controller;
+		_openURL = openURL;
+		_presentationHandler = presentationHandler;
+		_dismissalHandler = dismissalHandler;
+		_useBrowserAuth = useBrowserAuth;
+	}
+	return self;
 }
 
 - (void)presentErrorMessage:(NSString *)message title:(NSString *)title {
@@ -97,7 +112,13 @@ static DBMobileSharedApplication *s_mobileSharedApplication;
   if (_controller) {
     DBMobileSafariViewController *safariViewController =
         [[DBMobileSafariViewController alloc] initWithUrl:authURL cancelHandler:cancelHandler];
-    [_controller presentViewController:safariViewController animated:YES completion:nil];
+    if (_useBrowserAuth) {
+	  [self presentPlatformSpecificAuth: authURL];
+    } else if (_presentationHandler) {
+      _presentationHandler(safariViewController);
+    } else {
+      [_controller presentViewController:safariViewController animated:YES completion:nil];
+    }
   }
 }
 
@@ -109,9 +130,12 @@ static DBMobileSharedApplication *s_mobileSharedApplication;
   return [_sharedApplication canOpenURL:url];
 }
 
-- (void)dismissAuthController {
+- (void)dismissAuthControllerWithSuccess:(BOOL)success {
   if (_controller != nil) {
-    if (_controller.presentedViewController != nil && _controller.presentedViewController.isBeingDismissed == NO &&
+    if (_dismissalHandler) {
+      _dismissalHandler(success, _controller.presentedViewController);
+    }
+    else if (_controller.presentedViewController != nil && _controller.presentedViewController.isBeingDismissed == NO &&
         [_controller.presentedViewController isKindOfClass:[DBMobileSafariViewController class]]) {
       [_controller dismissViewControllerAnimated:YES completion:nil];
     }
@@ -148,7 +172,7 @@ static DBMobileSharedApplication *s_mobileSharedApplication;
 - (void)safariViewControllerDidFinish:(SFSafariViewController *)controller {
 #pragma unused(controller)
   _cancelHandler();
-  [[DBMobileSharedApplication mobileSharedApplication] dismissAuthController];
+  [[DBMobileSharedApplication mobileSharedApplication] dismissAuthControllerWithSuccess: NO];
 }
 
 @end

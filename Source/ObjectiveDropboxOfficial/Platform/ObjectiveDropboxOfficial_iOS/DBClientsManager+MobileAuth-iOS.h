@@ -32,6 +32,26 @@ NS_ASSUME_NONNULL_BEGIN
                         openURL:(void (^_Nonnull)(NSURL *))openURL;
 
 ///
+/// Commences OAuth mobile flow from supplied view controller.
+///
+/// @param sharedApplication The `UIApplication` with which to render the OAuth flow.
+/// @param controller The `UIViewController` with which to render the OAuth flow. Please ensure that this is the
+/// top-most view controller, so that the authorization view displays correctly.
+/// @param openURL A wrapper around app-extension unsafe `openURL` call.
+/// @param presentationHandler Block to set up the passed view controller
+/// for presentation.
+/// @param dismissalHandler Block to handle dissmissal of the passed view
+/// controller.
+/// @param useBrowserAuth Whether an external browser should be used for authentication.
+///
++ (void)authorizeFromController:(UIApplication *)sharedApplication
+					 controller:(nullable UIViewController *)controller
+						openURL:(void (^_Nonnull)(NSURL *))openURL
+			presentationHandler:(void (^_Nullable)(UIViewController *))presentationHandler
+			   dismissalHandler:(void(^_Nullable)(BOOL, UIViewController *))dismissalHandler
+				 useBrowserAuth:(BOOL)useBrowserAuth;
+
+///
 /// Stores the user app key. If any access token already exists, initializes an authorized shared `DBUserClient`
 /// instance. Convenience method for `setupWithTransportConfig:`.
 ///
