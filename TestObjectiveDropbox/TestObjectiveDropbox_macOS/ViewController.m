@@ -7,6 +7,7 @@
 
 #import <ObjectiveDropboxOfficial/ObjectiveDropboxOfficial.h>
 
+#import "TestAppType.h"
 #import "TestClasses.h"
 #import "TestData.h"
 #import "ViewController.h"
@@ -14,7 +15,6 @@
 @interface ViewController ()
 
 @property(weak) IBOutlet NSButtonCell *linkButton;
-@property(weak) IBOutlet NSButtonCell *linkBrowserButton;
 @property(weak) IBOutlet NSButtonCell *runTestsButton;
 @property(weak) IBOutlet NSButtonCell *unlinkButton;
 
@@ -23,49 +23,37 @@
 @implementation ViewController
 
 - (IBAction)linkButtonPressed:(id)sender {
-  [DropboxClientsManager authorizeFromControllerDesktop:[NSWorkspace sharedWorkspace]
+  [DBClientsManager authorizeFromControllerDesktop:[NSWorkspace sharedWorkspace]
                                       controller:self
                                          openURL:^(NSURL *url) {
                                            [[NSWorkspace sharedWorkspace] openURL:url];
-                                         }
-                                     browserAuth:NO];
-}
-
-- (IBAction)linkBrowserButtonPressed:(id)sender {
-  [DropboxClientsManager authorizeFromControllerDesktop:[NSWorkspace sharedWorkspace]
-                                      controller:self
-                                         openURL:^(NSURL *url) {
-                                           [[NSWorkspace sharedWorkspace] openURL:url];
-                                         }
-                                     browserAuth:YES];
+                                         }];
 }
 
 - (IBAction)runTestsButtonPressed:(id)sender {
   TestData *data = [TestData new];
-  DropboxTester *tester = [[DropboxTester alloc] initWithTestData:data];
-  DropboxTeamTester *teamTester = [[DropboxTeamTester alloc] initWithTestData:data];
   
   void (^unlink)() = ^{
     [TestFormat printAllTestsEnd];
-    [DropboxClientsManager unlinkClients];
-    [self checkButtons];
+    [DBClientsManager unlinkAndResetClients];
+    exit(0);
   };
   
   switch (appPermission) {
     case FullDropbox:
-      [tester testAllUserAPIEndpoints:tester nextTest:unlink asMember:NO];
+      [[[DropboxTester alloc] initWithTestData:data] testAllUserAPIEndpoints:unlink asMember:NO];
       break;
     case TeamMemberFileAccess:
-      [teamTester testAllTeamMemberFileAcessActions:unlink];
+      [[[DropboxTeamTester alloc] initWithTestData:data] testAllTeamMemberFileAcessActions:unlink];
       break;
     case TeamMemberManagement:
-      [teamTester testAllTeamMemberManagementActions:unlink];
+      [[[DropboxTeamTester alloc] initWithTestData:data] testAllTeamMemberManagementActions:unlink];
       break;
   }
 }
 
 - (IBAction)unlinkButtonPressed:(id)sender {
-  [DropboxClientsManager unlinkClients];
+  [DBClientsManager unlinkAndResetClients];
   [self checkButtons];
 }
 
@@ -75,7 +63,6 @@
 }
 
 - (void)viewWillAppear {
-  [self checkButtons];
 }
 
 - (void)setRepresentedObject:(id)representedObject {
@@ -85,22 +72,15 @@
 }
 
 - (void)checkButtons {
-  if ([DropboxClientsManager authorizedClient] != nil || [DropboxClientsManager authorizedTeamClient] != nil) {
-    if ([DropboxClientsManager authorizedClient].transportClient.accessToken != nil ||
-        [DropboxClientsManager authorizedTeamClient].transportClient.accessToken != nil) {
-      [_linkButton setEnabled:NO];
-      [_linkBrowserButton setEnabled:NO];
-      [_unlinkButton setEnabled:YES];
-      [_runTestsButton setEnabled:YES];
-
-      return;
-    }
+  if ([DBClientsManager authorizedClient] || [DBClientsManager authorizedTeamClient]) {
+    [_linkButton setEnabled:NO];
+    [_unlinkButton setEnabled:YES];
+    [_runTestsButton setEnabled:YES];
+  } else {
+    [_linkButton setEnabled:YES];
+    [_unlinkButton setEnabled:NO];
+    [_runTestsButton setEnabled:NO];
   }
-
-  [_linkButton setEnabled:YES];
-  [_linkBrowserButton setEnabled:YES];
-  [_unlinkButton setEnabled:NO];
-  [_runTestsButton setEnabled:NO];
 }
 
 /**
@@ -122,7 +102,7 @@
 
  1.) Fill in personal data in `TestData`in TestData.m.
  2.) For each of the above apps, you will need to add a user-specific app key. For each test run, you
- will need to call `[DropboxClientsManager setupWithAppKeyDesktop]` (or `[DropboxClientsManager setupWithTeamAppKeyDesktop]`) and
+ will need to call `[DBClientsManager setupWithAppKeyDesktop]` (or `[DBClientsManager setupWithTeamAppKeyDesktop]`) and
  supply the
  appropriate app key value, in AppDelegate.m.
  3.) Depending on which app you are currently testing, you will need to toggle the `appPermission` variable

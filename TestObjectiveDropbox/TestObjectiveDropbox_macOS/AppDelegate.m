@@ -8,9 +8,9 @@
 #import <ObjectiveDropboxOfficial/ObjectiveDropboxOfficial.h>
 
 #import "AppDelegate.h"
-#import "ViewController.h"
-
+#import "TestAppType.h"
 #import "TestData.h"
+#import "ViewController.h"
 
 @interface AppDelegate ()
 
@@ -22,24 +22,44 @@ static ViewController *viewController = nil;
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
   TestData *data = [TestData new];
-  DBTransportClient *transportClient = [[DBTransportClient alloc] initWithAccessToken:nil
-                                                                           selectUser:nil
-                                                                            userAgent:nil
-                                                                        delegateQueue:nil
-                                                                               appKey:data.fullDropboxAppKey
-                                                                            appSecret:data.fullDropboxAppSecret];
 
+  if ([data.fullDropboxAppSecret containsString:@"<"] ||
+      [data.teamMemberFileAccessAppKey containsString:@"<"] ||
+      [data.teamMemberManagementAppKey containsString:@"<"]) {
+    NSLog(@"\n\n\nMust set test data (in TestData.h) before launching app.\n\n\nTerminating.....\n\n");
+    exit(0);
+  }
+
+  NSUserDefaults *Defaults = [NSUserDefaults standardUserDefaults];
+  NSString *migrationOccuredLookupKey = [NSString stringWithFormat: @"KeychainV1TokenMigration-%@", data.fullDropboxAppKey];
+  [Defaults setObject:@"YES" forKey:migrationOccuredLookupKey];
+  [DBClientsManager checkAndPerformV1TokenMigration:^(BOOL shouldRetry, BOOL invalidAppKeyOrSecret, NSArray<NSArray<NSString *> *> *unsuccessfullyMigratedTokenData) {
+    NSLog(@"Migration completed.");
+    NSLog(shouldRetry ? @"ShouldRetry: Yes" : @"ShouldRetry: No");
+    NSLog(invalidAppKeyOrSecret ? @"InvalidAppKeyOrSecret: Yes" : @"InvalidAppKeyOrSecret: No");
+  } queue:nil appKey:data.fullDropboxAppKey appSecret:data.fullDropboxAppSecret];
+
+  DBTransportDefaultConfig *transportConfigFullDropbox =
+    [[DBTransportDefaultConfig alloc] initWithAppKey:data.fullDropboxAppKey appSecret:data.fullDropboxAppSecret];
+  DBTransportDefaultConfig *transportConfigTeamFileAccess =
+    [[DBTransportDefaultConfig alloc] initWithAppKey:data.teamMemberFileAccessAppKey appSecret:data.teamMemberFileAccessAppSecret];
+  DBTransportDefaultConfig *transportConfigTeamManagement =
+    [[DBTransportDefaultConfig alloc] initWithAppKey:data.teamMemberManagementAppKey appSecret:data.teamMemberManagementAppSecret];
+  
   switch (appPermission) {
     case FullDropbox:
-      [DropboxClientsManager setupWithAppKeyDesktop:data.fullDropboxAppKey transportClient:transportClient];
+      [DBClientsManager setupWithTransportConfigDesktop:transportConfigFullDropbox];
       break;
     case TeamMemberFileAccess:
-      [DropboxClientsManager setupWithTeamAppKeyDesktop:data.teamMemberFileAccessAppKey transportClient:transportClient];
+      [DBClientsManager setupWithTeamTransportConfigDesktop:transportConfigTeamFileAccess];
       break;
     case TeamMemberManagement:
-      [DropboxClientsManager setupWithTeamAppKeyDesktop:data.teamMemberManagementAppKey transportClient:transportClient];
+      [DBClientsManager setupWithTeamTransportConfigDesktop:transportConfigTeamManagement];
       break;
   }
+  viewController = (ViewController *)[[[NSApplication sharedApplication] windows] objectAtIndex:0].contentViewController;
+
+  [self checkButtons];
 }
 
 - (void)applicationWillFinishLaunching:(NSNotification *)notification {
@@ -47,12 +67,6 @@ static ViewController *viewController = nil;
                                                      andSelector:@selector(handleAppleEvent:withReplyEvent:)
                                                    forEventClass:kInternetEventClass
                                                       andEventID:kAEGetURL];
-}
-
-- (void)applicationDidBecomeActive:(NSNotification *)notification {
-  [NSApp activateIgnoringOtherApps:YES];
-  viewController = (ViewController *)[NSApplication sharedApplication].mainWindow.contentViewController;
-  [viewController checkButtons];
 }
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification {
@@ -63,20 +77,20 @@ static ViewController *viewController = nil;
   NSURL *url = [NSURL URLWithString:[[event paramDescriptorForKeyword:keyDirectObject] stringValue]];
   switch (appPermission) {
     case FullDropbox: {
-      DBOAuthResult *authResult = [DropboxClientsManager handleRedirectURL:url];
+      DBOAuthResult *authResult = [DBClientsManager handleRedirectURL:url];
       if (authResult != nil) {
         if ([authResult isSuccess]) {
-          NSLog(@"Success! User is logged into Dropbox.");
+          NSLog(@"\n\nSuccess! User is logged into Dropbox.\n\n");
         } else if ([authResult isCancel]) {
-          NSLog(@"Authorization flow was manually canceled by user!");
+          NSLog(@"\n\nAuthorization flow was manually canceled by user!\n\n");
         } else if ([authResult isError]) {
-          NSLog(@"Error: %@", authResult);
+          NSLog(@"\n\nError: %@\n\n", authResult);
         }
       }
       break;
     }
     case TeamMemberFileAccess: {
-      DBOAuthResult *authResult = [DropboxClientsManager handleRedirectURLTeam:url];
+      DBOAuthResult *authResult = [DBClientsManager handleRedirectURLTeam:url];
       if (authResult != nil) {
         if ([authResult isSuccess]) {
           NSLog(@"Success! User is logged into Dropbox.");
@@ -89,7 +103,7 @@ static ViewController *viewController = nil;
       break;
     }
     case TeamMemberManagement: {
-      DBOAuthResult *authResult = [DropboxClientsManager handleRedirectURLTeam:url];
+      DBOAuthResult *authResult = [DBClientsManager handleRedirectURLTeam:url];
       if (authResult != nil) {
         if ([authResult isSuccess]) {
           NSLog(@"Success! User is logged into Dropbox.");
@@ -102,7 +116,15 @@ static ViewController *viewController = nil;
       break;
     }
   }
-  [viewController checkButtons];
+  [self checkButtons];
+  [[NSRunningApplication currentApplication]
+      activateWithOptions:(NSApplicationActivateAllWindows | NSApplicationActivateIgnoringOtherApps)];
+}
+
+- (void)checkButtons {
+  if (viewController) {
+    [viewController checkButtons];
+  }
 }
 
 @end

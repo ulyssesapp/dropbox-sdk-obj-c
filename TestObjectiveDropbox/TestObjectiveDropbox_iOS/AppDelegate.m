@@ -8,9 +8,9 @@
 #import <ObjectiveDropboxOfficial/ObjectiveDropboxOfficial.h>
 
 #import "AppDelegate.h"
-#import "ViewController.h"
-
+#import "TestAppType.h"
 #import "TestData.h"
+#import "ViewController.h"
 
 @interface AppDelegate ()
 
@@ -20,23 +20,61 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
   TestData *data = [TestData new];
-  DBTransportClient *transportClient = [[DBTransportClient alloc] initWithAccessToken:nil
-                                                                           selectUser:nil
-                                                                            userAgent:nil
-                                                                        delegateQueue:nil
-                                                                               appKey:data.fullDropboxAppKey
-                                                                            appSecret:data.fullDropboxAppSecret];
+
+  if ([data.fullDropboxAppSecret containsString:@"<"] ||
+      [data.teamMemberFileAccessAppKey containsString:@"<"] ||
+      [data.teamMemberManagementAppKey containsString:@"<"]) {
+    NSLog(@"\n\n\nMust set test data (in TestData.h) before launching app.\n\n\nTerminating.....\n\n");
+    exit(0);
+  }
+
+  NSUserDefaults *Defaults = [NSUserDefaults standardUserDefaults];
+  NSString *migrationOccuredLookupKey = [NSString stringWithFormat: @"KeychainV1TokenMigration-%@", data.fullDropboxAppKey];
+  [Defaults setObject:@"YES" forKey:migrationOccuredLookupKey];
+  [DBClientsManager checkAndPerformV1TokenMigration:^(BOOL shouldRetry, BOOL invalidAppKeyOrSecret, NSArray<NSArray<NSString *> *> *unsuccessfullyMigratedTokenData) {
+    NSLog(@"Migration completed.");
+    NSLog(shouldRetry ? @"ShouldRetry: Yes" : @"ShouldRetry: No");
+    NSLog(invalidAppKeyOrSecret ? @"InvalidAppKeyOrSecret: Yes" : @"InvalidAppKeyOrSecret: No");
+  } queue:nil appKey:data.fullDropboxAppKey appSecret:data.fullDropboxAppSecret];
+
+  DBTransportDefaultConfig *transportConfigFullDropbox =
+    [[DBTransportDefaultConfig alloc] initWithAppKey:data.fullDropboxAppKey
+                                           appSecret:data.fullDropboxAppSecret
+                                           userAgent:nil
+                                          asMemberId:nil
+                                       delegateQueue:[NSOperationQueue new]
+                              forceForegroundSession:NO
+                           sharedContainerIdentifier:[NSBundle mainBundle].bundleIdentifier];
+  DBTransportDefaultConfig *transportConfigTeamFileAccess =
+    [[DBTransportDefaultConfig alloc] initWithAppKey:data.teamMemberFileAccessAppKey appSecret:data.teamMemberFileAccessAppSecret];
+  DBTransportDefaultConfig *transportConfigTeamManagement =
+    [[DBTransportDefaultConfig alloc] initWithAppKey:data.teamMemberManagementAppKey appSecret:data.teamMemberManagementAppSecret];
+
+  void (^networkGlobalResponseBlock)(DBRequestError *, DBTask *) =
+  ^(DBRequestError *networkError, DBTask *restartTask) {
+    if ([networkError isAuthError] || [networkError isBadInputError]) {
+      NSLog(@"Unexpected error. Logging out...");
+      [DBClientsManager unlinkAndResetClients];
+      ViewController *mainController = (ViewController *)self.window.rootViewController;
+      [mainController checkButtons];
+    }
+  };
+
+  // only one response block total to handle all network errors
+  [DBGlobalErrorResponseHandler registerNetworkErrorResponseBlock:networkGlobalResponseBlock];
+
   switch (appPermission) {
   case FullDropbox:
-      [DropboxClientsManager setupWithAppKey:data.fullDropboxAppKey transportClient:transportClient];
+      [DBClientsManager setupWithTransportConfig:transportConfigFullDropbox];
       break;
   case TeamMemberFileAccess:
-      [DropboxClientsManager setupWithTeamAppKey:data.teamMemberFileAccessAppKey transportClient:transportClient];
+      [DBClientsManager setupWithTeamTransportConfig:transportConfigTeamFileAccess];
       break;
   case TeamMemberManagement:
-      [DropboxClientsManager setupWithTeamAppKey:data.teamMemberManagementAppKey transportClient:transportClient];
+      [DBClientsManager setupWithTeamTransportConfig:transportConfigTeamManagement];
       break;
   }
+
   return YES;
 }
 
@@ -44,20 +82,20 @@
 
   switch (appPermission) {
   case FullDropbox: {
-    DBOAuthResult *authResult = [DropboxClientsManager handleRedirectURL:url];
+    DBOAuthResult *authResult = [DBClientsManager handleRedirectURL:url];
     if (authResult != nil) {
       if ([authResult isSuccess]) {
-        NSLog(@"Success! User is logged into Dropbox.");
+        NSLog(@"\n\nSuccess! User is logged into Dropbox.\n\n");
       } else if ([authResult isCancel]) {
-        NSLog(@"Authorization flow was manually canceled by user!");
+        NSLog(@"\n\nAuthorization flow was manually canceled by user!\n\n");
       } else if ([authResult isError]) {
-        NSLog(@"Error: %@", authResult);
+        NSLog(@"\n\nError: %@\n\n", authResult);
       }
     }
     break;
   }
   case TeamMemberFileAccess: {
-    DBOAuthResult *authResult = [DropboxClientsManager handleRedirectURLTeam:url];
+    DBOAuthResult *authResult = [DBClientsManager handleRedirectURLTeam:url];
     if (authResult != nil) {
       if ([authResult isSuccess]) {
         NSLog(@"Success! User is logged into Dropbox.");
@@ -70,7 +108,7 @@
     break;
   }
   case TeamMemberManagement: {
-    DBOAuthResult *authResult = [DropboxClientsManager handleRedirectURLTeam:url];
+    DBOAuthResult *authResult = [DBClientsManager handleRedirectURLTeam:url];
     if (authResult != nil) {
       if ([authResult isSuccess]) {
         NSLog(@"Success! User is logged into Dropbox.");
@@ -85,6 +123,30 @@
   }
 
   ViewController *mainController = (ViewController *)self.window.rootViewController;
+
+  if ([[url absoluteString] containsString:@"openWith"]) {
+    NSLog(@"Successfully retrieved openWith url");
+
+    NSMutableDictionary *urlData = [[NSMutableDictionary alloc] init];
+    NSArray *pairs = [[url absoluteString] componentsSeparatedByString:@"&"] ?: @[];
+
+    for (NSString *pair in pairs) {
+      NSArray *kv = [pair componentsSeparatedByString:@"="];
+      NSString *unEscapedValue = [[kv objectAtIndex:1] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+      [urlData setObject:unEscapedValue forKey:[kv objectAtIndex:0]];
+    }
+
+    DBOfficialAppConnector *connector = [[DBOfficialAppConnector alloc] initWithAppKey:[TestData new].fullDropboxAppKey
+                                                                     canOpenURLWrapper:^BOOL(NSURL *url) {
+                                                                       return [[UIApplication sharedApplication] canOpenURL:url];
+                                                                     }
+                                                                        openURLWrapper:^(NSURL *url) {
+                                                                          [[UIApplication sharedApplication] openURL:url];
+                                                                        }];
+
+    DBOpenWithInfo *openWithInfo = [connector openWithInfoFromURL:url];
+    [mainController setOpenWithInfoNSURL:openWithInfo];
+  }
   [mainController checkButtons];
 
   return NO;

@@ -7,76 +7,127 @@
 
 #import <ObjectiveDropboxOfficial/ObjectiveDropboxOfficial.h>
 
+#import "TestAppType.h"
 #import "TestClasses.h"
 #import "TestData.h"
 #import "ViewController.h"
 
+/// OpenWith data
+static DBOpenWithInfo *s_openWithInfoNSURL = nil;
+
 @interface ViewController ()
 
-@property(weak, nonatomic) IBOutlet UIButton *linkButton;
-@property(weak, nonatomic) IBOutlet UIButton *linkBrowserButton;
-@property(weak, nonatomic) IBOutlet UIButton *runTestsButton;
-@property(weak, nonatomic) IBOutlet UIButton *unlinkButton;
+@property (weak, nonatomic) IBOutlet UIButton *linkButton;
+@property (weak, nonatomic) IBOutlet UIButton *runTestsButton;
+@property (weak, nonatomic) IBOutlet UIButton *unlinkButton;
+@property (weak, nonatomic) IBOutlet UIButton *openWithButton;
+@property (weak, nonatomic) IBOutlet UIButton *runBatchUploadTestsButton;
+@property (weak, nonatomic) IBOutlet UIButton *runGlobalResponseTestsButton;
 
 @end
 
 @implementation ViewController
 - (IBAction)linkButtonPressed:(id)sender {
-  [DropboxClientsManager authorizeFromController:[UIApplication sharedApplication]
+  [DBClientsManager authorizeFromController:[UIApplication sharedApplication]
                                       controller:self
                                          openURL:^(NSURL *url) {
                                            [[UIApplication sharedApplication] openURL:url];
-                                         }
-                                     browserAuth:NO];
-}
-
-- (IBAction)linkBrowserButtonPressed:(id)sender {
-  [DropboxClientsManager authorizeFromController:[UIApplication sharedApplication]
-                                      controller:self
-                                         openURL:^(NSURL *url) {
-                                           [[UIApplication sharedApplication] openURL:url];
-                                         }
-                                     browserAuth:YES];
+                                         }];
 }
 
 - (IBAction)runTestsButtonPressed:(id)sender {
   TestData *data = [TestData new];
-  DropboxTester *tester = [[DropboxTester alloc] initWithTestData:data];
-  DropboxTeamTester *teamTester = [[DropboxTeamTester alloc] initWithTestData:data];
 
   void (^unlink)() = ^{
     [TestFormat printAllTestsEnd];
-    [DropboxClientsManager unlinkClients];
-    [self checkButtons];
-    [self.view setNeedsDisplay];
+    [DBClientsManager unlinkAndResetClients];
+    exit(0);
   };
 
   switch (appPermission) {
   case FullDropbox:
-    [tester testAllUserAPIEndpoints:tester nextTest:unlink asMember:NO];
+    [[[DropboxTester alloc] initWithTestData:data] testAllUserAPIEndpoints:unlink asMember:NO];
     break;
   case TeamMemberFileAccess:
-    [teamTester testAllTeamMemberFileAcessActions:unlink];
+    [[[DropboxTeamTester alloc] initWithTestData:data] testAllTeamMemberFileAcessActions:unlink];
     break;
   case TeamMemberManagement:
-    [teamTester testAllTeamMemberManagementActions:unlink];
+    [[[DropboxTeamTester alloc] initWithTestData:data] testAllTeamMemberManagementActions:unlink];
     break;
   }
 }
+
+- (IBAction)runBatchUploadTestsButtonPressed:(id)sender {
+  TestData *data = [TestData new];
+  BatchUploadTests *batchUploadTests = [[BatchUploadTests alloc] init:[[DropboxTester alloc] initWithTestData:data]];
+  [batchUploadTests batchUploadFiles];
+}
+
+- (IBAction)runGlobalResponseTestsButtonPressed:(id)sender {
+  TestData *data = [TestData new];
+  GlobalResponseTests *globalResponseTests = [[GlobalResponseTests alloc] init:[[DropboxTester alloc] initWithTestData:data]];
+  [[NSOperationQueue new] addOperationWithBlock:^{
+    [globalResponseTests runGlobalResponseTests];
+  }];
+}
+
+- (IBAction)openWithButtonPressedRunTests:(id)sender {
+  TestData *data = [TestData new];
+  
+  DBOfficialAppConnector *connector = [[DBOfficialAppConnector alloc] initWithAppKey:data.fullDropboxAppKey
+                                                                   canOpenURLWrapper:^BOOL(NSURL *url) {
+                                                                     return [[UIApplication sharedApplication] canOpenURL:url];
+                                                                   }
+                                                                      openURLWrapper:^(NSURL *url) {
+                                                                        [[UIApplication sharedApplication] openURL:url];
+                                                                      }];
+  DBOpenWithInfo *openWithInfo = [DBOfficialAppConnector retriveOfficialDropboxAppOpenWithInfo];
+  
+  if (openWithInfo) {
+    // Data retrieved from UIPasteboard
+    NSLog(@"Returning to Dropbox app via Pasteboard data...");
+    [connector returnToDropboxApp:openWithInfo changesPending:NO];
+  } else if (s_openWithInfoNSURL) {
+    // Data retrieved from openURL call
+    NSLog(@"Returning to Dropbox app via NSURL data...");
+    DBOfficialAppConnector *appConnector = [[DBOfficialAppConnector alloc] initWithAppKey:[DBClientsManager appKey]
+                                                                        canOpenURLWrapper:^BOOL(NSURL *url) {
+                                                                          return [[UIApplication sharedApplication] canOpenURL:url];
+                                                                        }
+                                                                           openURLWrapper:^(NSURL *url) {
+                                                                             [[UIApplication sharedApplication] openURL:url];
+                                                                           }];
+    [appConnector returnToDropboxApp:s_openWithInfoNSURL changesPending:NO];
+  } else {
+    // No OpenWith Data
+    NSLog(@"No info retrieved. Please ensure you have opened this test app with the correct OpenWith info.");
+  }
+}
+
 - (IBAction)unlinkButtonPressed:(id)sender {
-  [DropboxClientsManager unlinkClients];
+  [DBClientsManager unlinkAndResetClients];
   [self checkButtons];
+}
+
+- (void)setOpenWithInfoNSURL:(DBOpenWithInfo *)openWithInfoNSURL {
+  s_openWithInfoNSURL = openWithInfoNSURL;
 }
 
 - (void)viewDidLoad {
   [super viewDidLoad];
   [self checkButtons];
+  BOOL authorizedUser = [DBClientsManager authorizedClient].isAuthorized;
+  NSLog(@"%s", authorizedUser ? "user client authorized" : "user client not authorized");
+
+  BOOL authorizedTeam = [DBClientsManager authorizedTeamClient].isAuthorized;
+  NSLog(@"%s", authorizedTeam ? "team client authorized" : "team client not authorized");
 }
 
 - (void)viewDidAppear:(BOOL)animated {
-  [super viewDidLoad];
+  [super viewDidAppear:animated];
   [self checkButtons];
 }
+
 
 - (void)didReceiveMemoryWarning {
   [super didReceiveMemoryWarning];
@@ -84,21 +135,19 @@
 }
 
 - (void)checkButtons {
-  if ([DropboxClientsManager authorizedClient] != nil || [DropboxClientsManager authorizedTeamClient] != nil) {
-    if ([DropboxClientsManager authorizedClient].transportClient.accessToken != nil ||
-        [DropboxClientsManager authorizedTeamClient].transportClient.accessToken != nil) {
-      _linkButton.hidden = YES;
-      _linkBrowserButton.hidden = YES;
-      _unlinkButton.hidden = NO;
-      _runTestsButton.hidden = NO;
-      return;
-    }
+  if ([DBClientsManager authorizedClient] || [DBClientsManager authorizedTeamClient]) {
+    _linkButton.hidden = YES;
+    _unlinkButton.hidden = NO;
+    _runTestsButton.hidden = NO;
+    _runBatchUploadTestsButton.hidden = NO;
+    _runGlobalResponseTestsButton.hidden = NO;
+  } else {
+    _linkButton.hidden = NO;
+    _unlinkButton.hidden = YES;
+    _runTestsButton.hidden = YES;
+    _runBatchUploadTestsButton.hidden = YES;
+    _runGlobalResponseTestsButton.hidden = YES;
   }
-
-  _linkButton.hidden = NO;
-  _linkBrowserButton.hidden = NO;
-  _unlinkButton.hidden = YES;
-  _runTestsButton.hidden = YES;
 }
 
 /**
@@ -120,7 +169,7 @@
 
  1.) Fill in personal data in `TestData`in TestData.m.
  2.) For each of the above apps, you will need to add a user-specific app key. For each test run, you
- will need to call `[DropboxClientsManager setupWithAppKey]` (or `[DropboxClientsManager setupWithTeamAppKey]`) and
+ will need to call `[DBClientsManager setupWithAppKey]` (or `[DBClientsManager setupWithTeamAppKey]`) and
  supply the
  appropriate app key value, in AppDelegate.m.
  3.) Depending on which app you are currently testing, you will need to toggle the `appPermission` variable

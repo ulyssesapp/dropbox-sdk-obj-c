@@ -5,7 +5,9 @@ import argparse
 import glob
 import json
 import os
+import shutil
 import subprocess
+import sys
 
 cmdline_desc = """\
 Runs Stone to generate Obj-C types and client for the Dropbox client.
@@ -38,19 +40,29 @@ _cmdline_parser.add_argument(
     default=True,
 )
 _cmdline_parser.add_argument(
-    '-f',
-    '--formatting',
-    action='store_false',
-    help='Sets whether source should be formatted.',
-    default=True,
-)
-_cmdline_parser.add_argument(
     '-o',
-    '--output_path',
+    '--output-path',
     type=str,
     help='Path to generation output.',
 )
-
+_cmdline_parser.add_argument(
+    '-f',
+    '--format-output-path',
+    type=str,
+    help='Path to format output.',
+)
+_cmdline_parser.add_argument(
+    '-e',
+    '--exclude-from-analysis',
+    action='store_true',
+    help='Sets whether generated code should marked for exclusion from analysis.',
+)
+_cmdline_parser.add_argument(
+    '-r',
+    '--route-whitelist-filter',
+    type=str,
+    help='Path to route whitelist filter used by Stone. See stone -r for detailed instructions.',
+)
 
 def main():
     """The entry point for the program."""
@@ -71,9 +83,16 @@ def main():
     if args.stone:
         stone_path = args.stone
 
-    default_path = os.path.abspath('Source/ObjectiveDropboxOfficial/Shared/Generated')
-    dropbox_pkg_path = args.output_path if args.output_path else default_path
-    dropbox_format_path = os.path.abspath('Format')
+    dropbox_src_path = os.path.abspath('Source')
+    dropbox_default_output_path = os.path.abspath('Source/ObjectiveDropboxOfficial/Shared/Generated')
+    dropbox_pkg_path = args.output_path if args.output_path else dropbox_default_output_path
+    dropbox_format_script_path = os.path.abspath('Format')
+    dropbox_format_output_path = args.format_output_path if args.format_output_path else dropbox_src_path
+
+    # clear out all old files
+    if not args.format_output_path:
+        shutil.rmtree(dropbox_default_output_path)
+        os.makedirs(dropbox_default_output_path)
 
     if verbose:
         print('Dropbox package path: %s' % dropbox_pkg_path)
@@ -81,11 +100,25 @@ def main():
     if verbose:
         print('Generating Obj-C types')
 
-    types_cmd = (['python', '-m', 'stone.cli', '-a', 'host', '-a', 'style',
-                 '-a', 'auth', 'obj_c_types', dropbox_pkg_path] + specs)
+    stone_cmd_prefix = [
+        sys.executable,
+        '-m', 'stone.cli',
+        '-a', 'host',
+        '-a', 'style',
+        '-a', 'auth',
+    ]
+    if args.route_whitelist_filter:
+        stone_cmd_prefix += ['-r', args.route_whitelist_filter]
 
-    if args.documentation:
-        types_cmd += ['--', '-d', 'true']
+    types_cmd = stone_cmd_prefix + ['obj_c_types', dropbox_pkg_path] + specs
+
+    if args.documentation or args.exclude_from_analysis:
+        types_cmd += ['--']
+        if args.documentation:
+            types_cmd += ['-d']
+        if args.exclude_from_analysis:
+            types_cmd += ['-e']
+
     o = subprocess.check_output(
         (types_cmd),
         cwd=stone_path)
@@ -98,31 +131,34 @@ def main():
     if verbose:
         print('Generating Obj-C user and team clients')
     o = subprocess.check_output(
-        (['python', '-m', 'stone.cli', '-a', 'host', '-a', 'style', '-a', 'auth', 'obj_c_client', dropbox_pkg_path] +
-         specs + ['-b', 'team', '--', '-m', 'DBBase', '-c', 'DBBase',
+        (stone_cmd_prefix + ['obj_c_client', dropbox_pkg_path] +
+         specs + ['--', '-w', 'user', '-m', 'DBUserBaseClient', '-c', 'DBUserBaseClient',
          '-t', 'DBTransportClient', '-y', client_args, '-z', style_to_request]),
         cwd=stone_path)
     if o:
         print('Output:', o)
     o = subprocess.check_output(
-        (['python', '-m', 'stone.cli', '-a', 'host', '-a', 'style', '-a', 'auth', 'obj_c_client', dropbox_pkg_path] +
-         specs + ['-w', 'team', '--', '-m', 'DBBaseTeam', '-c', 'DBBaseTeam',
+        (stone_cmd_prefix + ['obj_c_client', dropbox_pkg_path] +
+         specs + ['--', '-w', 'team', '-m', 'DBTeamBaseClient', '-c', 'DBTeamBaseClient',
+         '-t', 'DBTransportClient', '-y', client_args, '-z', style_to_request]),
+        cwd=stone_path)
+    if o:
+        print('Output:', o)
+    o = subprocess.check_output(
+        (stone_cmd_prefix + ['obj_c_client', dropbox_pkg_path] +
+         specs + ['--', '-w', 'app', '-m', 'DBAppBaseClient', '-c', 'DBAppBaseClient',
          '-t', 'DBTransportClient', '-y', client_args, '-z', style_to_request]),
         cwd=stone_path)
     if o:
         print('Output:', o)
 
-    with open(dropbox_format_path + '/list_files_reformat.txt', "w") as outfile:
-        get_files_cmd = ['find', '../Source/', '-iname', '*.[mh]']
-        subprocess.call(get_files_cmd, stdout=outfile, cwd=dropbox_format_path)
+    if verbose:
+        print('Formatting source files')
 
-    if args.formatting:
-        if verbose:
-            print('Formatting source files')
-        o = subprocess.check_output(
-            (['sh', 'reformat_files.sh', 'list_files_reformat.txt']), cwd=dropbox_format_path)
-        if o:
-            print('Output:', o)
+    cmd = ['./format_files.sh', dropbox_format_output_path]
+    o = subprocess.check_output(cmd, cwd=dropbox_format_script_path)
+    if o:
+        print('Output:', o)
 
 
 def _get_client_args():
@@ -133,16 +169,27 @@ def _get_client_args():
         + 'overwrite conflicting file at destination. `NO` will take no action, resulting in an `NSError` '
         + 'returned to the response handler in the event of a file conflict.')
 
+    download_range_start_doc = ('For partial file download. Download file beginning from this starting byte'
+        + ' position. Must include valid end range value.')
+    download_range_end_doc = ('For partial file download. Download file up until this ending byte position.'
+        + ' Must include valid start range value.')
+
     client_args = {
         'upload': [
-            ('upload', ['Url', [('inputUrl', 'inputUrl', 'NSURL * _Nonnull', input_doc.format('NSURL *')), ], ]),
-            ('upload', ['Data', [('inputData', 'inputData', 'NSData * _Nonnull', input_doc.format('NSData *')), ], ]),
-            ('upload', ['Stream', [('inputStream', 'inputStream', 'NSInputStream * _Nonnull', input_doc.format('NSInputStream *')), ], ]),
+            ('upload', ['Url', [('inputUrl', 'inputUrl', 'NSString *', input_doc.format('NSString *')), ], ]),
+            ('upload', ['Data', [('inputData', 'inputData', 'NSData *', input_doc.format('NSData *')), ], ]),
+            ('upload', ['Stream', [('inputStream', 'inputStream', 'NSInputStream *', input_doc.format('NSInputStream *')), ], ]),
         ],
         'download': [
             ('download_url', ['Url', [('overwrite', 'overwrite', 'BOOL', overwrite_doc),
-                ('destination', 'destination', 'NSURL * _Nonnull', dest_doc), ], ]),
+                ('destination', 'destination', 'NSURL *', dest_doc), ], ]),
+            ('download_url', ['Url', [('overwrite', 'overwrite', 'BOOL', overwrite_doc),
+                ('destination', 'destination', 'NSURL *', dest_doc),
+                ('byteOffsetStart', 'byteOffsetStart', 'NSNumber *', download_range_start_doc),
+                ('byteOffsetEnd', 'byteOffsetEnd', 'NSNumber *', download_range_end_doc)], ]),
             ('download_data', ['Data', []]),
+            ('download_data', ['Data', [('byteOffsetStart', 'byteOffsetStart', 'NSNumber *', download_range_start_doc),
+                ('byteOffsetEnd', 'byteOffsetEnd', 'NSNumber *', download_range_end_doc)]]),
         ],
     }
 

@@ -2,15 +2,15 @@
 /// Copyright (c) 2016 Dropbox, Inc. All rights reserved.
 ///
 
-#import "DBConstants.h"
-#import "DBTasks.h"
 #import "DBTasksStorage.h"
+#import "DBSDKConstants.h"
+#import "DBTasksImpl.h"
 
 @interface DBTasksStorage ()
 
-@property (nonatomic) NSMutableDictionary<NSString *, DBUploadTask *> * _Nonnull uploadTasks;
-@property (nonatomic) NSMutableDictionary<NSString *, DBDownloadUrlTask *> * _Nonnull downloadUrlTasks;
-@property (nonatomic) NSMutableDictionary<NSString *, DBDownloadDataTask *> * _Nonnull downloadDataTasks;
+@property (nonatomic) NSMutableDictionary<NSString *, DBUploadTaskImpl *> *uploadTasks;
+@property (nonatomic) NSMutableDictionary<NSString *, DBDownloadUrlTaskImpl *> *downloadUrlTasks;
+@property (nonatomic) NSMutableDictionary<NSString *, DBDownloadDataTaskImpl *> *downloadDataTasks;
 
 @property (nonatomic) BOOL cancel;
 
@@ -33,15 +33,15 @@
     _cancel = YES;
 
     for (NSString *key in _uploadTasks) {
-      DBUploadTask *task = _uploadTasks[key];
+      DBUploadTaskImpl *task = _uploadTasks[key];
       [task cancel];
     }
     for (NSString *key in _downloadUrlTasks) {
-      DBDownloadUrlTask *task = _downloadUrlTasks[key];
+      DBDownloadUrlTaskImpl *task = _downloadUrlTasks[key];
       [task cancel];
     }
     for (NSString *key in _downloadDataTasks) {
-      DBDownloadDataTask *task = _downloadDataTasks[key];
+      DBDownloadDataTaskImpl *task = _downloadDataTasks[key];
       [task cancel];
     }
 
@@ -51,11 +51,11 @@
   }
 }
 
-- (void)addUploadTask:(DBUploadTask *)task {
+- (void)addUploadTask:(DBUploadTaskImpl *)task {
   @synchronized(self) {
     if (!_cancel) {
-      NSString *sessionId = task.session.configuration.identifier ?: kForegroundId;
-      NSString *key = [NSString stringWithFormat:@"%@/%lu", sessionId, (unsigned long)task.task.taskIdentifier];
+      NSString *sessionId = task.session.configuration.identifier ?: kForegroundSessionId;
+      NSString *key = [NSString stringWithFormat:@"%@/%lu", sessionId, (unsigned long)task.uploadTask.taskIdentifier];
       [_uploadTasks setObject:task forKey:key];
     } else {
       [task cancel];
@@ -63,19 +63,20 @@
   }
 }
 
-- (void)removeUploadTask:(DBUploadTask *)task {
+- (void)removeUploadTask:(DBUploadTaskImpl *)task {
   @synchronized(self) {
-    NSString *sessionId = task.session.configuration.identifier ?: kForegroundId;
-    NSString *key = [NSString stringWithFormat:@"%@/%lu", sessionId, (unsigned long)task.task.taskIdentifier];
+    NSString *sessionId = task.session.configuration.identifier ?: kForegroundSessionId;
+    NSString *key = [NSString stringWithFormat:@"%@/%lu", sessionId, (unsigned long)task.uploadTask.taskIdentifier];
     [_uploadTasks removeObjectForKey:key];
   }
 }
 
-- (void)addDownloadUrlTask:(DBDownloadUrlTask *)task {
+- (void)addDownloadUrlTask:(DBDownloadUrlTaskImpl *)task {
   @synchronized(self) {
     if (!_cancel) {
-      NSString *sessionId = task.session.configuration.identifier ?: kForegroundId;
-      NSString *key = [NSString stringWithFormat:@"%@/%lu", sessionId, (unsigned long)task.task.taskIdentifier];
+      NSString *sessionId = task.session.configuration.identifier ?: kForegroundSessionId;
+      NSString *key =
+          [NSString stringWithFormat:@"%@/%lu", sessionId, (unsigned long)task.downloadUrlTask.taskIdentifier];
       [_downloadUrlTasks setObject:task forKey:key];
     } else {
       [task cancel];
@@ -83,19 +84,21 @@
   }
 }
 
-- (void)removeDownloadUrlTask:(DBDownloadUrlTask *)task {
+- (void)removeDownloadUrlTask:(DBDownloadUrlTaskImpl *)task {
   @synchronized(self) {
-    NSString *sessionId = task.session.configuration.identifier ?: kForegroundId;
-    NSString *key = [NSString stringWithFormat:@"%@/%lu", sessionId, (unsigned long)task.task.taskIdentifier];
+    NSString *sessionId = task.session.configuration.identifier ?: kForegroundSessionId;
+    NSString *key =
+        [NSString stringWithFormat:@"%@/%lu", sessionId, (unsigned long)task.downloadUrlTask.taskIdentifier];
     [_downloadUrlTasks removeObjectForKey:key];
   }
 }
 
-- (void)addDownloadDataTask:(DBDownloadDataTask *)task {
+- (void)addDownloadDataTask:(DBDownloadDataTaskImpl *)task {
   @synchronized(self) {
     if (!_cancel) {
-      NSString *sessionId = task.session.configuration.identifier ?: kForegroundId;
-      NSString *key = [NSString stringWithFormat:@"%@/%lu", sessionId, (unsigned long)task.task.taskIdentifier];
+      NSString *sessionId = task.session.configuration.identifier ?: kForegroundSessionId;
+      NSString *key =
+          [NSString stringWithFormat:@"%@/%lu", sessionId, (unsigned long)task.downloadDataTask.taskIdentifier];
       [_downloadDataTasks setObject:task forKey:key];
     } else {
       [task cancel];
@@ -103,11 +106,18 @@
   }
 }
 
-- (void)removeDownloadDataTask:(DBDownloadDataTask *)task {
+- (void)removeDownloadDataTask:(DBDownloadDataTaskImpl *)task {
   @synchronized(self) {
-    NSString *sessionId = task.session.configuration.identifier ?: kForegroundId;
-    NSString *key = [NSString stringWithFormat:@"%@/%lu", sessionId, (unsigned long)task.task.taskIdentifier];
+    NSString *sessionId = task.session.configuration.identifier ?: kForegroundSessionId;
+    NSString *key =
+        [NSString stringWithFormat:@"%@/%lu", sessionId, (unsigned long)task.downloadDataTask.taskIdentifier];
     [_downloadDataTasks removeObjectForKey:key];
+  }
+}
+
+- (BOOL)tasksInProgress {
+  @synchronized(self) {
+    return [_uploadTasks count] > 0 || [_downloadUrlTasks count] > 0 || [_downloadDataTasks count] > 0;
   }
 }
 

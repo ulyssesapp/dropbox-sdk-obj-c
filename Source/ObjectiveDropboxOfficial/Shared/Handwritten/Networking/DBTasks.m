@@ -2,92 +2,162 @@
 /// Copyright (c) 2016 Dropbox, Inc. All rights reserved.
 ///
 
+#import "DBTasks.h"
 #import "DBDelegate.h"
+#import "DBGlobalErrorResponseHandler+Internal.h"
 #import "DBHandlerTypes.h"
 #import "DBRequestErrors.h"
 #import "DBStoneBase.h"
-#import "DBTasks.h"
-#import "DBTransportClientBase.h"
+#import "DBTransportBaseClient+Internal.h"
+#import "DBTransportBaseClient.h"
 
 #pragma mark - Base network task
 
-@implementation DBTask
+@implementation DBTask : NSObject
+
+- (instancetype)initWithRoute:(DBRoute *)route tokenUid:(NSString *)tokenUid {
+  self = [super init];
+  if (self) {
+    _route = route;
+    _queue = nil;
+    _tokenUid = [tokenUid copy];
+  }
+  return self;
+}
+
+- (void)cancel {
+  @throw [NSException
+      exceptionWithName:NSInternalInconsistencyException
+                 reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+               userInfo:nil];
+}
+
+- (void)suspend {
+  @throw [NSException
+      exceptionWithName:NSInternalInconsistencyException
+                 reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+               userInfo:nil];
+  ;
+}
+
+- (void)resume {
+  @throw [NSException
+      exceptionWithName:NSInternalInconsistencyException
+                 reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+               userInfo:nil];
+}
+
+- (void)start {
+  @throw [NSException
+      exceptionWithName:NSInternalInconsistencyException
+                 reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+               userInfo:nil];
+}
+
+- (DBTask *)restart {
+  @throw [NSException
+      exceptionWithName:NSInternalInconsistencyException
+                 reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+               userInfo:nil];
+}
+
++ (NSError *)dropboxBadResponseErrorWithException:(NSException *)exception {
+  return [NSError errorWithDomain:@"dropbox.com" code:0 userInfo:@{ @"error_message" : exception }];
+}
+
 @end
 
 #pragma mark - RPC-style network task
 
 @implementation DBRpcTask
 
-- (instancetype)initWithTask:(NSURLSessionDataTask *)task
-                     session:(NSURLSession *)session
-                    delegate:(DBDelegate *)delegate
-                       route:(DBRoute *)route {
-  self = [self init];
-  if (self) {
-    _task = task;
-    _session = session;
-    _delegate = delegate;
-    _route = route;
-  }
-  return self;
+- (DBRpcTask *)setResponseBlock:(DBRpcResponseBlockImpl)responseBlock {
+#pragma unused(responseBlock)
+  @throw [NSException
+      exceptionWithName:NSInternalInconsistencyException
+                 reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+               userInfo:nil];
 }
 
-- (DBRpcTask *)response:(void (^)(id, id, DBRequestError *))responseBlock {
-  return [self response:nil response:responseBlock];
+- (DBRpcTask *)setResponseBlock:(DBRpcResponseBlockImpl)responseBlock queue:(NSOperationQueue *)queue {
+#pragma unused(responseBlock)
+#pragma unused(queue)
+  @throw [NSException
+      exceptionWithName:NSInternalInconsistencyException
+                 reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+               userInfo:nil];
 }
 
-- (DBRpcTask *)response:(NSOperationQueue *)queue response:(void (^)(id, id, DBRequestError *))responseBlock {
-  DBRpcResponseBlock wrapperBlock = ^(NSData *data, NSURLResponse *response, NSError *clientError) {
+- (DBRpcTask *)setProgressBlock:(DBProgressBlock)progressBlock {
+#pragma unused(progressBlock)
+  @throw [NSException
+      exceptionWithName:NSInternalInconsistencyException
+                 reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+               userInfo:nil];
+}
+
+- (DBRpcTask *)setProgressBlock:(DBProgressBlock)progressBlock queue:(NSOperationQueue *)queue {
+#pragma unused(progressBlock)
+#pragma unused(queue)
+  @throw [NSException
+      exceptionWithName:NSInternalInconsistencyException
+                 reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+               userInfo:nil];
+}
+
+- (DBRpcResponseBlockStorage)storageBlockWithResponseBlock:(DBRpcResponseBlockImpl)responseBlock
+                                              cleanupBlock:(DBCleanupBlock)cleanupBlock {
+  __weak DBRpcTask *weakSelf = self;
+  DBRpcResponseBlockStorage storageBlock = ^BOOL(NSData *data, NSURLResponse *response, NSError *clientError) {
+    DBRpcTask *strongSelf = weakSelf;
+    if (strongSelf == nil) {
+      // Indicates failure and no-op
+      return NO;
+    }
+
     NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
     int statusCode = (int)httpResponse.statusCode;
     NSDictionary *httpHeaders = httpResponse.allHeaderFields;
 
-    DBRequestError *dbxError = [DBTransportClientBase dBRequestErrorWithErrorData:data
-                                                                      clientError:clientError
-                                                                       statusCode:statusCode
-                                                                      httpHeaders:httpHeaders];
-    if (dbxError) {
-      id routeError = [DBTransportClientBase statusCodeIsRouteError:statusCode]
-                          ? [DBTransportClientBase routeErrorWithRouteData:_route data:data statusCode:statusCode]
-                          : nil;
-      return responseBlock(nil, routeError, dbxError);
+    DBRoute *route = strongSelf->_route;
+
+    BOOL successful = NO;
+
+    id result = nil;
+    id routeError = nil;
+    DBRequestError *networkError = [DBTransportBaseClient dBRequestErrorWithErrorData:data
+                                                                          clientError:clientError
+                                                                           statusCode:statusCode
+                                                                          httpHeaders:httpHeaders];
+    if (networkError) {
+      routeError = [DBTransportBaseClient statusCodeIsRouteError:statusCode]
+                       ? [DBTransportBaseClient routeErrorWithRoute:route data:data statusCode:statusCode]
+                       : nil;
+      [DBGlobalErrorResponseHandler executeRegisteredResponseBlocksWithRouteError:routeError
+                                                                     networkError:networkError
+                                                                      restartTask:strongSelf];
+    } else {
+      NSError *serializationError;
+      @try {
+        result = [DBTransportBaseClient routeResultWithRoute:route data:data serializationError:&serializationError];
+      } @catch (NSException *exception) {
+        serializationError = [[self class] dropboxBadResponseErrorWithException:exception];
+      }
+      if (serializationError) {
+        networkError = [[DBRequestError alloc] initAsClientError:serializationError];
+      } else {
+        result = !route.resultType ? [DBNilObject new] : result;
+        successful = YES;
+      }
     }
 
-    NSError *serializationError;
-    id result =
-        [DBTransportClientBase routeResultWithRouteData:_route data:data serializationError:&serializationError];
-    if (serializationError) {
-      responseBlock(nil, nil, [[DBRequestError alloc] initAsClientError:serializationError]);
-      return;
-    }
-    result = !_route.resultType ? [DBNilObject new] : result;
-    responseBlock(result, nil, nil);
+    responseBlock(result, routeError, networkError);
+    cleanupBlock();
+
+    return successful;
   };
 
-  [_delegate addRpcResponseHandler:_task session:_session responseHandler:wrapperBlock responseHandlerQueue:queue];
-
-  return self;
-}
-
-- (DBRpcTask *)progress:(DBProgressBlock)progressBlock {
-  return [self progress:nil progress:progressBlock];
-}
-
-- (DBRpcTask *)progress:(NSOperationQueue *)handlerQueue progress:(DBProgressBlock)progressBlock {
-  [_delegate addProgressHandler:_task session:_session progressHandler:progressBlock progressHandlerQueue:handlerQueue];
-  return self;
-}
-
-- (void)cancel {
-  [self.task cancel];
-}
-
-- (void)suspend {
-  [self.task suspend];
-}
-
-- (void)resume {
-  [self.task resume];
+  return storageBlock;
 }
 
 @end
@@ -96,76 +166,93 @@
 
 @implementation DBUploadTask
 
-- (instancetype)initWithTask:(NSURLSessionUploadTask *)task
-                     session:(NSURLSession *)session
-                    delegate:(DBDelegate *)delegate
-                       route:(DBRoute *)route {
-  self = [self init];
-  if (self) {
-    _task = task;
-    _session = session;
-    _delegate = delegate;
-    _route = route;
-  }
-  return self;
+- (DBUploadTask *)setResponseBlock:(DBUploadResponseBlockImpl)responseBlock {
+#pragma unused(responseBlock)
+  @throw [NSException
+      exceptionWithName:NSInternalInconsistencyException
+                 reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+               userInfo:nil];
 }
 
-- (DBUploadTask *)response:(void (^)(id, id, DBRequestError *))responseBlock {
-  return [self response:nil response:responseBlock];
+- (DBUploadTask *)setResponseBlock:(DBUploadResponseBlockImpl)responseBlock queue:(NSOperationQueue *)queue {
+#pragma unused(responseBlock)
+#pragma unused(queue)
+  @throw [NSException
+      exceptionWithName:NSInternalInconsistencyException
+                 reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+               userInfo:nil];
 }
 
-- (DBUploadTask *)response:(NSOperationQueue *)queue response:(void (^)(id, id, DBRequestError *))responseBlock {
-  DBUploadResponseBlock wrapperBlock = ^(NSData *data, NSURLResponse *response, NSError *clientError) {
+- (DBUploadTask *)setProgressBlock:(DBProgressBlock)progressBlock {
+#pragma unused(progressBlock)
+  @throw [NSException
+      exceptionWithName:NSInternalInconsistencyException
+                 reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+               userInfo:nil];
+}
+
+- (DBUploadTask *)setProgressBlock:(DBProgressBlock)progressBlock queue:(NSOperationQueue *)queue {
+#pragma unused(progressBlock)
+#pragma unused(queue)
+  @throw [NSException
+      exceptionWithName:NSInternalInconsistencyException
+                 reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+               userInfo:nil];
+}
+
+- (DBUploadResponseBlockStorage)storageBlockWithResponseBlock:(DBUploadResponseBlockImpl)responseBlock
+                                                 cleanupBlock:(DBCleanupBlock)cleanupBlock {
+  __weak DBUploadTask *weakSelf = self;
+  DBUploadResponseBlockStorage storageBlock = ^BOOL(NSData *data, NSURLResponse *response, NSError *clientError) {
+    DBUploadTask *strongSelf = weakSelf;
+    if (strongSelf == nil) {
+      // Indicates failure and no-op
+      return NO;
+    }
+
     NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
     int statusCode = (int)httpResponse.statusCode;
     NSDictionary *httpHeaders = httpResponse.allHeaderFields;
 
-    DBRequestError *dbxError = [DBTransportClientBase dBRequestErrorWithErrorData:data
-                                                                      clientError:clientError
-                                                                       statusCode:statusCode
-                                                                      httpHeaders:httpHeaders];
-    if (dbxError) {
-      id routeError = [DBTransportClientBase statusCodeIsRouteError:statusCode]
-                          ? [DBTransportClientBase routeErrorWithRouteData:_route data:data statusCode:statusCode]
-                          : nil;
-      return responseBlock(nil, routeError, dbxError);
+    DBRoute *route = strongSelf->_route;
+
+    BOOL successful = NO;
+
+    id result = nil;
+    id routeError = nil;
+    DBRequestError *networkError = [DBTransportBaseClient dBRequestErrorWithErrorData:data
+                                                                          clientError:clientError
+                                                                           statusCode:statusCode
+                                                                          httpHeaders:httpHeaders];
+    if (networkError) {
+      routeError = [DBTransportBaseClient statusCodeIsRouteError:statusCode]
+                       ? [DBTransportBaseClient routeErrorWithRoute:route data:data statusCode:statusCode]
+                       : nil;
+      [DBGlobalErrorResponseHandler executeRegisteredResponseBlocksWithRouteError:routeError
+                                                                     networkError:networkError
+                                                                      restartTask:strongSelf];
+    } else {
+      NSError *serializationError;
+      @try {
+        result = [DBTransportBaseClient routeResultWithRoute:route data:data serializationError:&serializationError];
+      } @catch (NSException *exception) {
+        serializationError = [[self class] dropboxBadResponseErrorWithException:exception];
+      }
+      if (serializationError) {
+        networkError = [[DBRequestError alloc] initAsClientError:serializationError];
+      } else {
+        result = !route.resultType ? [DBNilObject new] : result;
+        successful = YES;
+      }
     }
 
-    NSError *serializationError;
-    id result =
-        [DBTransportClientBase routeResultWithRouteData:_route data:data serializationError:&serializationError];
-    if (serializationError) {
-      responseBlock(nil, nil, [[DBRequestError alloc] initAsClientError:serializationError]);
-      return;
-    }
-    result = !_route.resultType ? [DBNilObject new] : result;
-    responseBlock(result, nil, nil);
+    responseBlock(result, routeError, networkError);
+    cleanupBlock();
+
+    return successful;
   };
 
-  [_delegate addUploadResponseHandler:_task session:_session responseHandler:wrapperBlock responseHandlerQueue:queue];
-
-  return self;
-}
-
-- (DBUploadTask *)progress:(DBProgressBlock)progressBlock {
-  return [self progress:nil progress:progressBlock];
-}
-
-- (DBUploadTask *)progress:(NSOperationQueue *)handlerQueue progress:(DBProgressBlock)progressBlock {
-  [_delegate addProgressHandler:_task session:_session progressHandler:progressBlock progressHandlerQueue:handlerQueue];
-  return self;
-}
-
-- (void)cancel {
-  [self.task cancel];
-}
-
-- (void)suspend {
-  [self.task suspend];
-}
-
-- (void)resume {
-  [self.task resume];
+  return storageBlock;
 }
 
 @end
@@ -174,111 +261,130 @@
 
 @implementation DBDownloadUrlTask
 
-- (instancetype)initWithTask:(NSURLSessionDownloadTask *)task
-                     session:(NSURLSession *)session
-                    delegate:(DBDelegate *)delegate
-                       route:(DBRoute *)route
-                   overwrite:(BOOL)overwrite
-                 destination:(NSURL *)destination {
-  self = [self init];
-  if (self) {
-    _task = task;
-    _session = session;
-    _delegate = delegate;
-    _route = route;
-    _overwrite = overwrite;
-    _destination = destination;
-  }
-  return self;
+- (DBDownloadUrlTask *)setResponseBlock:(DBDownloadUrlResponseBlockImpl)responseBlock {
+#pragma unused(responseBlock)
+  @throw [NSException
+      exceptionWithName:NSInternalInconsistencyException
+                 reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+               userInfo:nil];
 }
 
-- (DBDownloadUrlTask *)response:(void (^)(id, id, DBRequestError *dbxError, NSURL *))responseBlock {
-  return [self response:nil response:responseBlock];
+- (DBDownloadUrlTask *)setResponseBlock:(DBDownloadUrlResponseBlockImpl)responseBlock queue:(NSOperationQueue *)queue {
+#pragma unused(responseBlock)
+#pragma unused(queue)
+  @throw [NSException
+      exceptionWithName:NSInternalInconsistencyException
+                 reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+               userInfo:nil];
 }
 
-- (DBDownloadUrlTask *)response:(NSOperationQueue *)queue
-                       response:(void (^)(id, id, DBRequestError *dbxError, NSURL *))responseBlock {
-  DBDownloadResponseBlock wrapperBlock = ^(NSURL *location, NSURLResponse *response, NSError *clientError) {
+- (DBDownloadUrlTask *)setProgressBlock:(DBProgressBlock)progressBlock {
+#pragma unused(progressBlock)
+  @throw [NSException
+      exceptionWithName:NSInternalInconsistencyException
+                 reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+               userInfo:nil];
+}
+
+- (DBDownloadUrlTask *)setProgressBlock:(DBProgressBlock)progressBlock queue:(NSOperationQueue *)queue {
+#pragma unused(progressBlock)
+#pragma unused(queue)
+  @throw [NSException
+      exceptionWithName:NSInternalInconsistencyException
+                 reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+               userInfo:nil];
+}
+
+- (DBDownloadResponseBlockStorage)storageBlockWithResponseBlock:(DBDownloadUrlResponseBlockImpl)responseBlock
+                                                   cleanupBlock:(DBCleanupBlock)cleanupBlock {
+  __weak DBDownloadUrlTask *weakSelf = self;
+  DBDownloadResponseBlockStorage storageBlock = ^BOOL(NSURL *location, NSURLResponse *response, NSError *clientError) {
+    DBDownloadUrlTask *strongSelf = weakSelf;
+    if (strongSelf == nil) {
+      // Indicates failure and no-op
+      return NO;
+    }
+
     NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
     int statusCode = (int)httpResponse.statusCode;
     NSDictionary *httpHeaders = httpResponse.allHeaderFields;
-    NSString *headerString = [DBTransportClientBase caseInsensitiveLookup:@"Dropbox-API-Result" dictionary:httpHeaders];
-    NSData *resultData = headerString ? [headerString dataUsingEncoding:NSUTF8StringEncoding] : nil;
+    id headerString =
+        [DBTransportBaseClient caseInsensitiveLookupWithKey:@"Dropbox-API-Result" headerFieldsDictionary:httpHeaders];
 
-    if (clientError || !resultData) {
-      // error data is in response body (downloaded to output tmp file)
-      NSData *errorData = location ? [NSData dataWithContentsOfFile:[location path]] : nil;
-      DBRequestError *dbxError = [DBTransportClientBase dBRequestErrorWithErrorData:errorData
-                                                                        clientError:clientError
-                                                                         statusCode:statusCode
-                                                                        httpHeaders:httpHeaders];
-      id routeError = [DBTransportClientBase statusCodeIsRouteError:statusCode]
-                          ? [DBTransportClientBase routeErrorWithRouteData:_route data:errorData statusCode:statusCode]
-                          : nil;
-      return responseBlock(nil, routeError, dbxError, _destination);
+    NSData *resultData = nil;
+    if ([headerString isKindOfClass:[NSString class]]) {
+      // If `headerString == nil` then `resultData = nil`
+      resultData = [headerString dataUsingEncoding:NSUTF8StringEncoding];
     }
 
-    NSFileManager *fileManager = [NSFileManager defaultManager];
-    NSString *destinationPath = [_destination path];
+    DBRoute *route = strongSelf->_route;
 
-    if ([fileManager fileExistsAtPath:destinationPath]) {
-      NSError *fileMoveError;
-      if (_overwrite) {
-        [fileManager removeItemAtPath:destinationPath error:&fileMoveError];
-        if (fileMoveError) {
-          responseBlock(nil, nil, [[DBRequestError alloc] initAsClientError:fileMoveError], _destination);
-          return;
+    BOOL successful = NO;
+
+    id result = nil;
+    id routeError = nil;
+    DBRequestError *networkError = nil;
+    NSURL *destination = strongSelf->_destination;
+
+    if (clientError || !resultData || !location) {
+      // error data is in response body (downloaded to output tmp file)
+      NSData *errorData = location ? [NSData dataWithContentsOfURL:location] : nil;
+      networkError = [DBTransportBaseClient dBRequestErrorWithErrorData:errorData
+                                                            clientError:clientError
+                                                             statusCode:statusCode
+                                                            httpHeaders:httpHeaders];
+      routeError = [DBTransportBaseClient statusCodeIsRouteError:statusCode]
+                       ? [DBTransportBaseClient routeErrorWithRoute:route data:errorData statusCode:statusCode]
+                       : nil;
+      [DBGlobalErrorResponseHandler executeRegisteredResponseBlocksWithRouteError:routeError
+                                                                     networkError:networkError
+                                                                      restartTask:strongSelf];
+    } else {
+      NSFileManager *fileManager = [NSFileManager defaultManager];
+      NSString *destinationPath = [destination path];
+
+      NSError *fileMoveErrorOverwrite;
+
+      if (strongSelf->_overwrite && [fileManager fileExistsAtPath:destinationPath]) {
+        [fileManager removeItemAtPath:destinationPath error:&fileMoveErrorOverwrite];
+      }
+
+      if (fileMoveErrorOverwrite) {
+        networkError = [[DBRequestError alloc] initAsClientError:fileMoveErrorOverwrite];
+      } else {
+        NSError *fileMoveErrorToDestination = nil;
+        if (destinationPath) {
+          [fileManager moveItemAtPath:[location path] toPath:destinationPath error:&fileMoveErrorToDestination];
+        }
+
+        if (fileMoveErrorToDestination) {
+          networkError = [[DBRequestError alloc] initAsClientError:fileMoveErrorToDestination];
+        } else {
+          NSError *serializationError;
+          @try {
+            result = [DBTransportBaseClient routeResultWithRoute:route
+                                                            data:resultData
+                                              serializationError:&serializationError];
+          } @catch (NSException *exception) {
+            serializationError = [[self class] dropboxBadResponseErrorWithException:exception];
+          }
+          if (serializationError) {
+            networkError = [[DBRequestError alloc] initAsClientError:serializationError];
+          } else {
+            result = !route.resultType ? [DBNilObject new] : result;
+            successful = YES;
+          }
         }
       }
-      [fileManager moveItemAtPath:[location path] toPath:destinationPath error:&fileMoveError];
-      if (fileMoveError) {
-        responseBlock(nil, nil, [[DBRequestError alloc] initAsClientError:fileMoveError], _destination);
-        return;
-      }
-    } else {
-      NSError *fileMoveError;
-      [fileManager moveItemAtPath:[location path] toPath:destinationPath error:&fileMoveError];
-      if (fileMoveError) {
-        responseBlock(nil, nil, [[DBRequestError alloc] initAsClientError:fileMoveError], _destination);
-        return;
-      }
     }
 
-    NSError *serializationError;
-    id result =
-        [DBTransportClientBase routeResultWithRouteData:_route data:resultData serializationError:&serializationError];
-    if (serializationError) {
-      responseBlock(nil, nil, [[DBRequestError alloc] initAsClientError:serializationError], _destination);
-      return;
-    }
-    result = !_route.resultType ? [DBNilObject new] : result;
-    responseBlock(result, nil, nil, _destination);
+    responseBlock(result, routeError, networkError, destination ?: location);
+    cleanupBlock();
+
+    return successful;
   };
 
-  [_delegate addDownloadResponseHandler:_task session:_session responseHandler:wrapperBlock responseHandlerQueue:queue];
-
-  return self;
-}
-
-- (DBDownloadUrlTask *)progress:(DBProgressBlock)progressBlock {
-  return [self progress:nil progress:progressBlock];
-}
-
-- (DBDownloadUrlTask *)progress:(NSOperationQueue *)handlerQueue progress:(DBProgressBlock)progressBlock {
-  [_delegate addProgressHandler:_task session:_session progressHandler:progressBlock progressHandlerQueue:handlerQueue];
-  return self;
-}
-
-- (void)cancel {
-  [self.task cancel];
-}
-
-- (void)suspend {
-  [self.task suspend];
-}
-
-- (void)resume {
-  [self.task resume];
+  return storageBlock;
 }
 
 @end
@@ -287,81 +393,109 @@
 
 @implementation DBDownloadDataTask
 
-- (instancetype)initWithTask:(NSURLSessionDownloadTask *)task
-                     session:(NSURLSession *)session
-                    delegate:(DBDelegate *)delegate
-                       route:(DBRoute *)route {
-  self = [self init];
-  if (self) {
-    _task = task;
-    _session = session;
-    _delegate = delegate;
-    _route = route;
-  }
-  return self;
+- (DBDownloadDataTask *)setResponseBlock:(DBDownloadDataResponseBlockImpl)responseBlock {
+#pragma unused(responseBlock)
+  @throw [NSException
+      exceptionWithName:NSInternalInconsistencyException
+                 reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+               userInfo:nil];
 }
 
-- (DBDownloadDataTask *)response:(void (^)(id, id, DBRequestError *dbxError, NSData *))responseBlock {
-  return [self response:nil response:responseBlock];
+- (DBDownloadDataTask *)setResponseBlock:(DBDownloadDataResponseBlockImpl)responseBlock
+                                   queue:(NSOperationQueue *)queue {
+#pragma unused(responseBlock)
+#pragma unused(queue)
+  @throw [NSException
+      exceptionWithName:NSInternalInconsistencyException
+                 reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+               userInfo:nil];
 }
 
-- (DBDownloadDataTask *)response:(NSOperationQueue *)queue
-                        response:(void (^)(id, id, DBRequestError *dbxError, NSData *))responseBlock {
-  DBDownloadResponseBlock wrapperBlock = ^(NSURL *location, NSURLResponse *response, NSError *clientError) {
+- (DBDownloadDataTask *)setProgressBlock:(DBProgressBlock)progressBlock {
+#pragma unused(progressBlock)
+  @throw [NSException
+      exceptionWithName:NSInternalInconsistencyException
+                 reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+               userInfo:nil];
+}
+
+- (DBDownloadDataTask *)setProgressBlock:(DBProgressBlock)progressBlock queue:(NSOperationQueue *)queue {
+#pragma unused(progressBlock)
+#pragma unused(queue)
+  @throw [NSException
+      exceptionWithName:NSInternalInconsistencyException
+                 reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+               userInfo:nil];
+}
+
+- (DBDownloadResponseBlockStorage)storageBlockWithResponseBlock:(DBDownloadDataResponseBlockImpl)responseBlock
+                                                   cleanupBlock:(DBCleanupBlock)cleanupBlock {
+  __weak DBDownloadDataTask *weakSelf = self;
+  DBDownloadResponseBlockStorage storageBlock = ^BOOL(NSURL *location, NSURLResponse *response, NSError *clientError) {
+    DBDownloadDataTask *strongSelf = weakSelf;
+    if (strongSelf == nil) {
+      // Indicates failure and no-op
+      return NO;
+    }
+
     NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
     int statusCode = (int)httpResponse.statusCode;
     NSDictionary *httpHeaders = httpResponse.allHeaderFields;
-    NSString *headerString = [DBTransportClientBase caseInsensitiveLookup:@"Dropbox-API-Result" dictionary:httpHeaders];
-    NSData *resultData = headerString ? [headerString dataUsingEncoding:NSUTF8StringEncoding] : nil;
+    id headerString =
+        [DBTransportBaseClient caseInsensitiveLookupWithKey:@"Dropbox-API-Result" headerFieldsDictionary:httpHeaders];
+
+    NSData *resultData = nil;
+    if ([headerString isKindOfClass:[NSString class]]) {
+      // If `headerString == nil` then `resultData = nil`
+      resultData = [headerString dataUsingEncoding:NSUTF8StringEncoding];
+    }
+
+    DBRoute *route = strongSelf->_route;
+
+    BOOL successful = NO;
+
+    id result = nil;
+    id routeError = nil;
+    DBRequestError *networkError = nil;
+    NSData *downloadContent = nil;
 
     if (clientError || !resultData) {
       // error data is in response body (downloaded to output tmp file)
       NSData *errorData = location ? [NSData dataWithContentsOfFile:[location path]] : nil;
-      DBRequestError *dbxError = [DBTransportClientBase dBRequestErrorWithErrorData:errorData
-                                                                        clientError:clientError
-                                                                         statusCode:statusCode
-                                                                        httpHeaders:httpHeaders];
-      id routeError = [DBTransportClientBase statusCodeIsRouteError:statusCode]
-                          ? [DBTransportClientBase routeErrorWithRouteData:_route data:errorData statusCode:statusCode]
-                          : nil;
-      return responseBlock(nil, routeError, dbxError, nil);
+      networkError = [DBTransportBaseClient dBRequestErrorWithErrorData:errorData
+                                                            clientError:clientError
+                                                             statusCode:statusCode
+                                                            httpHeaders:httpHeaders];
+      routeError = [DBTransportBaseClient statusCodeIsRouteError:statusCode]
+                       ? [DBTransportBaseClient routeErrorWithRoute:route data:errorData statusCode:statusCode]
+                       : nil;
+      [DBGlobalErrorResponseHandler executeRegisteredResponseBlocksWithRouteError:routeError
+                                                                     networkError:networkError
+                                                                      restartTask:strongSelf];
+    } else {
+      NSError *serializationError;
+      @try {
+        result =
+            [DBTransportBaseClient routeResultWithRoute:route data:resultData serializationError:&serializationError];
+      } @catch (NSException *exception) {
+        serializationError = [[self class] dropboxBadResponseErrorWithException:exception];
+      }
+      if (serializationError) {
+        networkError = [[DBRequestError alloc] initAsClientError:serializationError];
+      } else {
+        result = !route.resultType ? [DBNilObject new] : result;
+        downloadContent = [NSData dataWithContentsOfFile:[location path]];
+        successful = YES;
+      }
     }
 
-    NSError *serializationError;
-    id result =
-        [DBTransportClientBase routeResultWithRouteData:_route data:resultData serializationError:&serializationError];
-    if (serializationError) {
-      responseBlock(nil, nil, [[DBRequestError alloc] initAsClientError:serializationError], nil);
-      return;
-    }
-    result = !_route.resultType ? [DBNilObject new] : result;
-    responseBlock(result, nil, nil, [NSData dataWithContentsOfFile:[location path]]);
+    responseBlock(result, routeError, networkError, downloadContent);
+    cleanupBlock();
+
+    return successful;
   };
 
-  [_delegate addDownloadResponseHandler:_task session:_session responseHandler:wrapperBlock responseHandlerQueue:queue];
-
-  return self;
-}
-
-- (DBDownloadDataTask *)progress:(DBProgressBlock)progressBlock {
-  return [self progress:nil progress:progressBlock];
-}
-
-- (DBDownloadDataTask *)progress:(NSOperationQueue *)handlerQueue progress:(DBProgressBlock)progressBlock {
-  [_delegate addProgressHandler:_task session:_session progressHandler:progressBlock progressHandlerQueue:handlerQueue];
-  return self;
-}
-
-- (void)cancel {
-  [self.task cancel];
-}
-
-- (void)suspend {
-  [self.task suspend];
-}
-
-- (void)resume {
-  [self.task resume];
+  return storageBlock;
 }
 
 @end
