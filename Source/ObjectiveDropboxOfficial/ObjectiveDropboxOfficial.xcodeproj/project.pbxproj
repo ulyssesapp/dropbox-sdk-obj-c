@@ -10269,10 +10269,11 @@
 			};
 			buildConfigurationList = F26B756F1D7F6AF700714F70 /* Build configuration list for PBXProject "ObjectiveDropboxOfficial" */;
 			compatibilityVersion = "Xcode 3.2";
-			developmentRegion = English;
+			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
+				Base,
 			);
 			mainGroup = F26B756B1D7F6AF700714F70;
 			productRefGroup = F26B75761D7F6AF700714F70 /* Products */;
