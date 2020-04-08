@@ -33,7 +33,7 @@
 - (IBAction)runTestsButtonPressed:(id)sender {
   TestData *data = [TestData new];
   
-  void (^unlink)() = ^{
+  void (^unlink)(void) = ^{
     [TestFormat printAllTestsEnd];
     [DBClientsManager unlinkAndResetClients];
     exit(0);

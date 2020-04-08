@@ -119,33 +119,33 @@ static NSString *sDateFormat = nil;
   __block BOOL inQuotedText = NO;
 
   // Proper way to enumerate characters in a string taken from https://www.objc.io/issues/9-strings/unicode/
-  [format
-      enumerateSubstringsInRange:NSMakeRange(0, [format length])
-                         options:NSStringEnumerationByComposedCharacterSequences
-                      usingBlock:^(NSString *substring, NSRange substringRange, NSRange enclosingRange __attribute__((unused)), BOOL *stop) {
-                        if ([substring isEqualToString:@"%"]) {
-                          if (substringRange.location >= format.length - 1) {
-                            *stop = YES;
-                            return;
-                          }
+  [format enumerateSubstringsInRange:NSMakeRange(0, [format length])
+                             options:NSStringEnumerationByComposedCharacterSequences
+                          usingBlock:^(NSString *substring, NSRange substringRange __attribute__((unused)),
+                                       NSRange enclosingRange __attribute__((unused)), BOOL *stop) {
+                            if ([substring isEqualToString:@"%"]) {
+                              if (substringRange.location >= format.length - 1) {
+                                *stop = YES;
+                                return;
+                              }
 
-                          if (inQuotedText) {
-                            [newFormat appendString:@"'"];
-                            inQuotedText = NO;
-                          }
-                          [newFormat appendString:[self formatDateToken:substring]];
-                        } else {
-                          if ([alphabeticSet longCharacterIsMember:[substring characterAtIndex:0]]) {
-                            if (!inQuotedText) {
-                              [newFormat appendString:@"'"];
-                              inQuotedText = YES;
+                              if (inQuotedText) {
+                                [newFormat appendString:@"'"];
+                                inQuotedText = NO;
+                              }
+                              [newFormat appendString:[self formatDateToken:substring]];
+                            } else {
+                              if ([alphabeticSet longCharacterIsMember:[substring characterAtIndex:0]]) {
+                                if (!inQuotedText) {
+                                  [newFormat appendString:@"'"];
+                                  inQuotedText = YES;
+                                }
+                              } else if ([substring isEqualToString:@"'"]) {
+                                [newFormat appendString:@"'"];
+                              }
+                              [newFormat appendString:substring];
                             }
-                          } else if ([substring isEqualToString:@"'"]) {
-                            [newFormat appendString:@"'"];
-                          }
-                          [newFormat appendString:substring];
-                        }
-                      }];
+                          }];
 
   if (inQuotedText) {
     [newFormat appendString:@"'"];
