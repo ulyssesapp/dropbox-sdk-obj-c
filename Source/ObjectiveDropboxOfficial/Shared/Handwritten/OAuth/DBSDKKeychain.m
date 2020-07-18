@@ -211,7 +211,7 @@ static const char *kV1OSXAccountName = "Dropbox";
     for (NSDictionary<NSString *, id> *dict in dataResultDict) {
       NSData *foundData = dict[(NSString *)kSecValueData];
       if (foundData != nil) {
-        NSDictionary *unarchivedFoundData = [NSKeyedUnarchiver unarchiveObjectWithData:foundData];
+		  NSDictionary *unarchivedFoundData = [NSKeyedUnarchiver unarchivedObjectOfClass:NSDictionary.class fromData:foundData error:NULL];
         NSString *retrievedAppKey = unarchivedFoundData[kV1ConsumerAppKeyKey];
         NSArray<NSDictionary<NSString *, id> *> *credentialsList = unarchivedFoundData[kV1UserCredentialsKey];
         for (NSDictionary<NSString *, id> *credential in credentialsList) {
@@ -255,7 +255,7 @@ static const char *kV1OSXAccountName = "Dropbox";
       NSData *foundData = dict[(NSString *)kSecValueData];
       if (foundData != nil) {
         NSDictionary *credentialsDictionary =
-            [NSKeyedUnarchiver unarchiveObjectWithData:foundData][kV1SyncAccountCredentialsKey];
+            [NSKeyedUnarchiver unarchivedObjectOfClass:NSDictionary.class fromData:foundData error:NULL][kV1SyncAccountCredentialsKey];
         for (NSString *credentialKey in credentialsDictionary) {
           NSArray<NSDictionary<NSString *, id> *> *credentialList = credentialsDictionary[credentialKey];
           for (NSDictionary<NSString *, id> *credential in credentialList) {
