@@ -100,6 +100,7 @@ static DBMobileSharedApplication *s_mobileSharedApplication;
   if (_controller) {
     DBMobileSafariViewController *safariViewController =
         [[DBMobileSafariViewController alloc] initWithUrl:authURL cancelHandler:cancelHandler];
+	safariViewController.modalPresentationStyle = UIModalPresentationFormSheet;
     [_controller presentViewController:safariViewController animated:YES completion:nil];
   }
 }
