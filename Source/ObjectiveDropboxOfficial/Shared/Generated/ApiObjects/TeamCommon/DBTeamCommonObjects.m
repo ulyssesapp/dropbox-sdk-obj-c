@@ -93,9 +93,9 @@
   return [DBTEAMCOMMONGroupManagementTypeSerializer deserialize:dict];
 }
 
-#pragma mark - Description method
+#pragma mark - Debug Description method
 
-- (NSString *)description {
+- (NSString *)debugDescription {
   return [[DBTEAMCOMMONGroupManagementTypeSerializer serialize:self] description];
 }
 
@@ -116,12 +116,16 @@
   switch (_tag) {
   case DBTEAMCOMMONGroupManagementTypeUserManaged:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBTEAMCOMMONGroupManagementTypeCompanyManaged:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBTEAMCOMMONGroupManagementTypeSystemManaged:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBTEAMCOMMONGroupManagementTypeOther:
     result = prime * result + [[self tagName] hash];
+    break;
   }
 
   return prime * result;
@@ -252,9 +256,9 @@
   return [DBTEAMCOMMONGroupSummarySerializer deserialize:dict];
 }
 
-#pragma mark - Description method
+#pragma mark - Debug Description method
 
-- (NSString *)description {
+- (NSString *)debugDescription {
   return [[DBTEAMCOMMONGroupSummarySerializer serialize:self] description];
 }
 
@@ -436,9 +440,9 @@
   return [DBTEAMCOMMONGroupTypeSerializer deserialize:dict];
 }
 
-#pragma mark - Description method
+#pragma mark - Debug Description method
 
-- (NSString *)description {
+- (NSString *)debugDescription {
   return [[DBTEAMCOMMONGroupTypeSerializer serialize:self] description];
 }
 
@@ -459,10 +463,13 @@
   switch (_tag) {
   case DBTEAMCOMMONGroupTypeTeam:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBTEAMCOMMONGroupTypeUserManaged:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBTEAMCOMMONGroupTypeOther:
     result = prime * result + [[self tagName] hash];
+    break;
   }
 
   return prime * result;
@@ -623,9 +630,9 @@
   return [DBTEAMCOMMONMemberSpaceLimitTypeSerializer deserialize:dict];
 }
 
-#pragma mark - Description method
+#pragma mark - Debug Description method
 
-- (NSString *)description {
+- (NSString *)debugDescription {
   return [[DBTEAMCOMMONMemberSpaceLimitTypeSerializer serialize:self] description];
 }
 
@@ -646,12 +653,16 @@
   switch (_tag) {
   case DBTEAMCOMMONMemberSpaceLimitTypeOff:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBTEAMCOMMONMemberSpaceLimitTypeAlertOnly:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBTEAMCOMMONMemberSpaceLimitTypeStopSync:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBTEAMCOMMONMemberSpaceLimitTypeOther:
     result = prime * result + [[self tagName] hash];
+    break;
   }
 
   return prime * result;
@@ -765,9 +776,9 @@
   return [DBTEAMCOMMONTimeRangeSerializer deserialize:dict];
 }
 
-#pragma mark - Description method
+#pragma mark - Debug Description method
 
-- (NSString *)description {
+- (NSString *)debugDescription {
   return [[DBTEAMCOMMONTimeRangeSerializer serialize:self] description];
 }
 

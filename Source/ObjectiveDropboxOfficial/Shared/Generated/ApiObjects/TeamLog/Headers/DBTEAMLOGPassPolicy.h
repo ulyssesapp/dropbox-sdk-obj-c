@@ -27,18 +27,18 @@ NS_ASSUME_NONNULL_BEGIN
 
 /// The `DBTEAMLOGPassPolicyTag` enum type represents the possible tag states
 /// with which the `DBTEAMLOGPassPolicy` union can exist.
-typedef NS_ENUM(NSInteger, DBTEAMLOGPassPolicyTag) {
-  /// (no description).
-  DBTEAMLOGPassPolicyEnabled,
+typedef NS_CLOSED_ENUM(NSInteger, DBTEAMLOGPassPolicyTag){
+    /// (no description).
+    DBTEAMLOGPassPolicyAllow,
 
-  /// (no description).
-  DBTEAMLOGPassPolicyAllow,
+    /// (no description).
+    DBTEAMLOGPassPolicyDisabled,
 
-  /// (no description).
-  DBTEAMLOGPassPolicyDisabled,
+    /// (no description).
+    DBTEAMLOGPassPolicyEnabled,
 
-  /// (no description).
-  DBTEAMLOGPassPolicyOther,
+    /// (no description).
+    DBTEAMLOGPassPolicyOther,
 
 };
 
@@ -46,13 +46,6 @@ typedef NS_ENUM(NSInteger, DBTEAMLOGPassPolicyTag) {
 @property (nonatomic, readonly) DBTEAMLOGPassPolicyTag tag;
 
 #pragma mark - Constructors
-
-///
-/// Initializes union class with tag state of "enabled".
-///
-/// @return An initialized instance.
-///
-- (instancetype)initWithEnabled;
 
 ///
 /// Initializes union class with tag state of "allow".
@@ -69,6 +62,13 @@ typedef NS_ENUM(NSInteger, DBTEAMLOGPassPolicyTag) {
 - (instancetype)initWithDisabled;
 
 ///
+/// Initializes union class with tag state of "enabled".
+///
+/// @return An initialized instance.
+///
+- (instancetype)initWithEnabled;
+
+///
 /// Initializes union class with tag state of "other".
 ///
 /// @return An initialized instance.
@@ -78,13 +78,6 @@ typedef NS_ENUM(NSInteger, DBTEAMLOGPassPolicyTag) {
 - (instancetype)init NS_UNAVAILABLE;
 
 #pragma mark - Tag state methods
-
-///
-/// Retrieves whether the union's current tag state has value "enabled".
-///
-/// @return Whether the union's current tag state has value "enabled".
-///
-- (BOOL)isEnabled;
 
 ///
 /// Retrieves whether the union's current tag state has value "allow".
@@ -99,6 +92,13 @@ typedef NS_ENUM(NSInteger, DBTEAMLOGPassPolicyTag) {
 /// @return Whether the union's current tag state has value "disabled".
 ///
 - (BOOL)isDisabled;
+
+///
+/// Retrieves whether the union's current tag state has value "enabled".
+///
+/// @return Whether the union's current tag state has value "enabled".
+///
+- (BOOL)isEnabled;
 
 ///
 /// Retrieves whether the union's current tag state has value "other".

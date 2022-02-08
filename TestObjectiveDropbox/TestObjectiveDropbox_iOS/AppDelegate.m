@@ -19,11 +19,15 @@
 @implementation AppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
+    if([[NSProcessInfo processInfo] environment][@"XCTestConfigurationFilePath"] != nil) {
+        // running unit tests
+        self.window.rootViewController = [[UIViewController alloc] init];
+        return YES;
+    }
+
   TestData *data = [TestData new];
 
-  if ([data.fullDropboxAppSecret containsString:@"<"] ||
-      [data.teamMemberFileAccessAppKey containsString:@"<"] ||
-      [data.teamMemberManagementAppKey containsString:@"<"]) {
+  if ([data.fullDropboxAppSecret containsString:@"<"]) {
     NSLog(@"\n\n\nMust set test data (in TestData.h) before launching app.\n\n\nTerminating.....\n\n");
     exit(0);
   }
@@ -45,10 +49,6 @@
                                        delegateQueue:[NSOperationQueue new]
                               forceForegroundSession:NO
                            sharedContainerIdentifier:[NSBundle mainBundle].bundleIdentifier];
-  DBTransportDefaultConfig *transportConfigTeamFileAccess =
-    [[DBTransportDefaultConfig alloc] initWithAppKey:data.teamMemberFileAccessAppKey appSecret:data.teamMemberFileAccessAppSecret];
-  DBTransportDefaultConfig *transportConfigTeamManagement =
-    [[DBTransportDefaultConfig alloc] initWithAppKey:data.teamMemberManagementAppKey appSecret:data.teamMemberManagementAppSecret];
 
   void (^networkGlobalResponseBlock)(DBRequestError *, DBTask *) =
   ^(DBRequestError *networkError, DBTask *restartTask) {
@@ -64,14 +64,11 @@
   [DBGlobalErrorResponseHandler registerNetworkErrorResponseBlock:networkGlobalResponseBlock];
 
   switch (appPermission) {
-  case FullDropbox:
+  case FullDropboxScoped:
       [DBClientsManager setupWithTransportConfig:transportConfigFullDropbox];
       break;
-  case TeamMemberFileAccess:
-      [DBClientsManager setupWithTeamTransportConfig:transportConfigTeamFileAccess];
-      break;
-  case TeamMemberManagement:
-      [DBClientsManager setupWithTeamTransportConfig:transportConfigTeamManagement];
+  case FullDropboxScopedForTeamTesting:
+      [DBClientsManager setupWithTeamTransportConfig:transportConfigFullDropbox];
       break;
   }
 
@@ -79,51 +76,7 @@
 }
 
 - (BOOL)application:(UIApplication *)application handleOpenURL:(NSURL *)url {
-
-  switch (appPermission) {
-  case FullDropbox: {
-    DBOAuthResult *authResult = [DBClientsManager handleRedirectURL:url];
-    if (authResult != nil) {
-      if ([authResult isSuccess]) {
-        NSLog(@"\n\nSuccess! User is logged into Dropbox.\n\n");
-      } else if ([authResult isCancel]) {
-        NSLog(@"\n\nAuthorization flow was manually canceled by user!\n\n");
-      } else if ([authResult isError]) {
-        NSLog(@"\n\nError: %@\n\n", authResult);
-      }
-    }
-    break;
-  }
-  case TeamMemberFileAccess: {
-    DBOAuthResult *authResult = [DBClientsManager handleRedirectURLTeam:url];
-    if (authResult != nil) {
-      if ([authResult isSuccess]) {
-        NSLog(@"Success! User is logged into Dropbox.");
-      } else if ([authResult isCancel]) {
-        NSLog(@"Authorization flow was manually canceled by user!");
-      } else if ([authResult isError]) {
-        NSLog(@"Error: %@", authResult);
-      }
-    }
-    break;
-  }
-  case TeamMemberManagement: {
-    DBOAuthResult *authResult = [DBClientsManager handleRedirectURLTeam:url];
-    if (authResult != nil) {
-      if ([authResult isSuccess]) {
-        NSLog(@"Success! User is logged into Dropbox.");
-      } else if ([authResult isCancel]) {
-        NSLog(@"Authorization flow was manually canceled by user!");
-      } else if ([authResult isError]) {
-        NSLog(@"Error: %@", authResult);
-      }
-    }
-    break;
-  }
-  }
-
-  ViewController *mainController = (ViewController *)self.window.rootViewController;
-
+  BOOL urlHandled = NO;
   if ([[url absoluteString] containsString:@"openWith"]) {
     NSLog(@"Successfully retrieved openWith url");
 
@@ -145,11 +98,13 @@
                                                                         }];
 
     DBOpenWithInfo *openWithInfo = [connector openWithInfoFromURL:url];
-    [mainController setOpenWithInfoNSURL:openWithInfo];
+    [((ViewController *)self.window.rootViewController) setOpenWithInfoNSURL:openWithInfo];
+    urlHandled = YES;
+  } else {
+    urlHandled = [self db_handleAuthUrl:url];
   }
-  [mainController checkButtons];
 
-  return NO;
+  return urlHandled;
 }
 
 - (void)applicationWillResignActive:(UIApplication *)application {
@@ -180,6 +135,33 @@
 - (void)applicationWillTerminate:(UIApplication *)application {
   // Called when the application is about to terminate. Save data if appropriate. See also
   // applicationDidEnterBackground:.
+}
+
+- (BOOL)db_handleAuthUrl:(NSURL *)url {
+  DBOAuthCompletion completion = ^(DBOAuthResult *authResult) {
+    if (authResult != nil) {
+      if ([authResult isSuccess]) {
+        NSLog(@"\n\nSuccess! User is logged into Dropbox.\n\n");
+      } else if ([authResult isCancel]) {
+        NSLog(@"\n\nAuthorization flow was manually canceled by user!\n\n");
+      } else if ([authResult isError]) {
+        NSLog(@"\n\nError: %@\n\n", authResult);
+      }
+    }
+    [((ViewController *)self.window.rootViewController) checkButtons];
+  };
+
+  BOOL handled = NO;
+  switch (appPermission) {
+    case FullDropboxScoped: {
+      handled = [DBClientsManager handleRedirectURL:url completion:completion];
+      break;
+    }
+    case FullDropboxScopedForTeamTesting:
+      handled = [DBClientsManager handleRedirectURLTeam:url completion:completion];
+    break;
+  }
+  return handled;
 }
 
 @end

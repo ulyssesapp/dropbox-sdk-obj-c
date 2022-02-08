@@ -30,30 +30,40 @@ NS_ASSUME_NONNULL_BEGIN
 
 /// The `DBFILESUploadSessionFinishErrorTag` enum type represents the possible
 /// tag states with which the `DBFILESUploadSessionFinishError` union can exist.
-typedef NS_ENUM(NSInteger, DBFILESUploadSessionFinishErrorTag) {
-  /// The session arguments are incorrect; the value explains the reason.
-  DBFILESUploadSessionFinishErrorLookupFailed,
+typedef NS_CLOSED_ENUM(NSInteger, DBFILESUploadSessionFinishErrorTag){
+    /// The session arguments are incorrect; the value explains the reason.
+    DBFILESUploadSessionFinishErrorLookupFailed,
 
-  /// Unable to save the uploaded contents to a file. Data has already been
-  /// appended to the upload session. Please retry with empty data body and
-  /// updated offset.
-  DBFILESUploadSessionFinishErrorPath,
+    /// Unable to save the uploaded contents to a file. Data has already been
+    /// appended to the upload session. Please retry with empty data body and
+    /// updated offset.
+    DBFILESUploadSessionFinishErrorPath,
 
-  /// The supplied property group is invalid. The file has uploaded without
-  /// property groups.
-  DBFILESUploadSessionFinishErrorPropertiesError,
+    /// The supplied property group is invalid. The file has uploaded without
+    /// property groups.
+    DBFILESUploadSessionFinishErrorPropertiesError,
 
-  /// The batch request commits files into too many different shared folders.
-  /// Please limit your batch request to files contained in a single shared
-  /// folder.
-  DBFILESUploadSessionFinishErrorTooManySharedFolderTargets,
+    /// The batch request commits files into too many different shared folders.
+    /// Please limit your batch request to files contained in a single shared
+    /// folder.
+    DBFILESUploadSessionFinishErrorTooManySharedFolderTargets,
 
-  /// There are too many write operations happening in the user's Dropbox. You
-  /// should retry uploading this file.
-  DBFILESUploadSessionFinishErrorTooManyWriteOperations,
+    /// There are too many write operations happening in the user's Dropbox. You
+    /// should retry uploading this file.
+    DBFILESUploadSessionFinishErrorTooManyWriteOperations,
 
-  /// (no description).
-  DBFILESUploadSessionFinishErrorOther,
+    /// Uploading data not allowed when finishing concurrent upload session.
+    DBFILESUploadSessionFinishErrorConcurrentSessionDataNotAllowed,
+
+    /// Concurrent upload sessions need to be closed before finishing.
+    DBFILESUploadSessionFinishErrorConcurrentSessionNotClosed,
+
+    /// Not all pieces of data were uploaded before trying to finish the
+    /// session.
+    DBFILESUploadSessionFinishErrorConcurrentSessionMissingData,
+
+    /// (no description).
+    DBFILESUploadSessionFinishErrorOther,
 
 };
 
@@ -142,6 +152,37 @@ typedef NS_ENUM(NSInteger, DBFILESUploadSessionFinishErrorTag) {
 - (instancetype)initWithTooManyWriteOperations;
 
 ///
+/// Initializes union class with tag state of
+/// "concurrent_session_data_not_allowed".
+///
+/// Description of the "concurrent_session_data_not_allowed" tag state:
+/// Uploading data not allowed when finishing concurrent upload session.
+///
+/// @return An initialized instance.
+///
+- (instancetype)initWithConcurrentSessionDataNotAllowed;
+
+///
+/// Initializes union class with tag state of "concurrent_session_not_closed".
+///
+/// Description of the "concurrent_session_not_closed" tag state: Concurrent
+/// upload sessions need to be closed before finishing.
+///
+/// @return An initialized instance.
+///
+- (instancetype)initWithConcurrentSessionNotClosed;
+
+///
+/// Initializes union class with tag state of "concurrent_session_missing_data".
+///
+/// Description of the "concurrent_session_missing_data" tag state: Not all
+/// pieces of data were uploaded before trying to finish the session.
+///
+/// @return An initialized instance.
+///
+- (instancetype)initWithConcurrentSessionMissingData;
+
+///
 /// Initializes union class with tag state of "other".
 ///
 /// @return An initialized instance.
@@ -200,6 +241,33 @@ typedef NS_ENUM(NSInteger, DBFILESUploadSessionFinishErrorTag) {
 /// "too_many_write_operations".
 ///
 - (BOOL)isTooManyWriteOperations;
+
+///
+/// Retrieves whether the union's current tag state has value
+/// "concurrent_session_data_not_allowed".
+///
+/// @return Whether the union's current tag state has value
+/// "concurrent_session_data_not_allowed".
+///
+- (BOOL)isConcurrentSessionDataNotAllowed;
+
+///
+/// Retrieves whether the union's current tag state has value
+/// "concurrent_session_not_closed".
+///
+/// @return Whether the union's current tag state has value
+/// "concurrent_session_not_closed".
+///
+- (BOOL)isConcurrentSessionNotClosed;
+
+///
+/// Retrieves whether the union's current tag state has value
+/// "concurrent_session_missing_data".
+///
+/// @return Whether the union's current tag state has value
+/// "concurrent_session_missing_data".
+///
+- (BOOL)isConcurrentSessionMissingData;
 
 ///
 /// Retrieves whether the union's current tag state has value "other".

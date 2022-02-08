@@ -27,33 +27,33 @@ NS_ASSUME_NONNULL_BEGIN
 
 /// The `DBTEAMLOGTimeUnitTag` enum type represents the possible tag states with
 /// which the `DBTEAMLOGTimeUnit` union can exist.
-typedef NS_ENUM(NSInteger, DBTEAMLOGTimeUnitTag) {
-  /// (no description).
-  DBTEAMLOGTimeUnitMilliseconds,
+typedef NS_CLOSED_ENUM(NSInteger, DBTEAMLOGTimeUnitTag){
+    /// (no description).
+    DBTEAMLOGTimeUnitDays,
 
-  /// (no description).
-  DBTEAMLOGTimeUnitSeconds,
+    /// (no description).
+    DBTEAMLOGTimeUnitHours,
 
-  /// (no description).
-  DBTEAMLOGTimeUnitMinutes,
+    /// (no description).
+    DBTEAMLOGTimeUnitMilliseconds,
 
-  /// (no description).
-  DBTEAMLOGTimeUnitHours,
+    /// (no description).
+    DBTEAMLOGTimeUnitMinutes,
 
-  /// (no description).
-  DBTEAMLOGTimeUnitDays,
+    /// (no description).
+    DBTEAMLOGTimeUnitMonths,
 
-  /// (no description).
-  DBTEAMLOGTimeUnitWeeks,
+    /// (no description).
+    DBTEAMLOGTimeUnitSeconds,
 
-  /// (no description).
-  DBTEAMLOGTimeUnitMonths,
+    /// (no description).
+    DBTEAMLOGTimeUnitWeeks,
 
-  /// (no description).
-  DBTEAMLOGTimeUnitYears,
+    /// (no description).
+    DBTEAMLOGTimeUnitYears,
 
-  /// (no description).
-  DBTEAMLOGTimeUnitOther,
+    /// (no description).
+    DBTEAMLOGTimeUnitOther,
 
 };
 
@@ -63,25 +63,11 @@ typedef NS_ENUM(NSInteger, DBTEAMLOGTimeUnitTag) {
 #pragma mark - Constructors
 
 ///
-/// Initializes union class with tag state of "milliseconds".
+/// Initializes union class with tag state of "days".
 ///
 /// @return An initialized instance.
 ///
-- (instancetype)initWithMilliseconds;
-
-///
-/// Initializes union class with tag state of "seconds".
-///
-/// @return An initialized instance.
-///
-- (instancetype)initWithSeconds;
-
-///
-/// Initializes union class with tag state of "minutes".
-///
-/// @return An initialized instance.
-///
-- (instancetype)initWithMinutes;
+- (instancetype)initWithDays;
 
 ///
 /// Initializes union class with tag state of "hours".
@@ -91,18 +77,18 @@ typedef NS_ENUM(NSInteger, DBTEAMLOGTimeUnitTag) {
 - (instancetype)initWithHours;
 
 ///
-/// Initializes union class with tag state of "days".
+/// Initializes union class with tag state of "milliseconds".
 ///
 /// @return An initialized instance.
 ///
-- (instancetype)initWithDays;
+- (instancetype)initWithMilliseconds;
 
 ///
-/// Initializes union class with tag state of "weeks".
+/// Initializes union class with tag state of "minutes".
 ///
 /// @return An initialized instance.
 ///
-- (instancetype)initWithWeeks;
+- (instancetype)initWithMinutes;
 
 ///
 /// Initializes union class with tag state of "months".
@@ -110,6 +96,20 @@ typedef NS_ENUM(NSInteger, DBTEAMLOGTimeUnitTag) {
 /// @return An initialized instance.
 ///
 - (instancetype)initWithMonths;
+
+///
+/// Initializes union class with tag state of "seconds".
+///
+/// @return An initialized instance.
+///
+- (instancetype)initWithSeconds;
+
+///
+/// Initializes union class with tag state of "weeks".
+///
+/// @return An initialized instance.
+///
+- (instancetype)initWithWeeks;
 
 ///
 /// Initializes union class with tag state of "years".
@@ -130,25 +130,11 @@ typedef NS_ENUM(NSInteger, DBTEAMLOGTimeUnitTag) {
 #pragma mark - Tag state methods
 
 ///
-/// Retrieves whether the union's current tag state has value "milliseconds".
+/// Retrieves whether the union's current tag state has value "days".
 ///
-/// @return Whether the union's current tag state has value "milliseconds".
+/// @return Whether the union's current tag state has value "days".
 ///
-- (BOOL)isMilliseconds;
-
-///
-/// Retrieves whether the union's current tag state has value "seconds".
-///
-/// @return Whether the union's current tag state has value "seconds".
-///
-- (BOOL)isSeconds;
-
-///
-/// Retrieves whether the union's current tag state has value "minutes".
-///
-/// @return Whether the union's current tag state has value "minutes".
-///
-- (BOOL)isMinutes;
+- (BOOL)isDays;
 
 ///
 /// Retrieves whether the union's current tag state has value "hours".
@@ -158,18 +144,18 @@ typedef NS_ENUM(NSInteger, DBTEAMLOGTimeUnitTag) {
 - (BOOL)isHours;
 
 ///
-/// Retrieves whether the union's current tag state has value "days".
+/// Retrieves whether the union's current tag state has value "milliseconds".
 ///
-/// @return Whether the union's current tag state has value "days".
+/// @return Whether the union's current tag state has value "milliseconds".
 ///
-- (BOOL)isDays;
+- (BOOL)isMilliseconds;
 
 ///
-/// Retrieves whether the union's current tag state has value "weeks".
+/// Retrieves whether the union's current tag state has value "minutes".
 ///
-/// @return Whether the union's current tag state has value "weeks".
+/// @return Whether the union's current tag state has value "minutes".
 ///
-- (BOOL)isWeeks;
+- (BOOL)isMinutes;
 
 ///
 /// Retrieves whether the union's current tag state has value "months".
@@ -177,6 +163,20 @@ typedef NS_ENUM(NSInteger, DBTEAMLOGTimeUnitTag) {
 /// @return Whether the union's current tag state has value "months".
 ///
 - (BOOL)isMonths;
+
+///
+/// Retrieves whether the union's current tag state has value "seconds".
+///
+/// @return Whether the union's current tag state has value "seconds".
+///
+- (BOOL)isSeconds;
+
+///
+/// Retrieves whether the union's current tag state has value "weeks".
+///
+/// @return Whether the union's current tag state has value "weeks".
+///
+- (BOOL)isWeeks;
 
 ///
 /// Retrieves whether the union's current tag state has value "years".

@@ -7,6 +7,7 @@
 #import "DBAUTHAccessError.h"
 #import "DBAUTHAuthError.h"
 #import "DBAUTHRateLimitError.h"
+#import "DBAccessTokenProvider+Internal.h"
 #import "DBCOMMONPathRootError.h"
 #import "DBRequestErrors.h"
 #import "DBSDKConstants.h"
@@ -26,13 +27,23 @@
 - (instancetype)initWithAccessToken:(NSString *)accessToken
                            tokenUid:(NSString *)tokenUid
                     transportConfig:(DBTransportBaseConfig *)transportConfig {
+  DBLongLivedAccessTokenProvider *provider = nil;
+  if (accessToken) {
+    provider = [[DBLongLivedAccessTokenProvider alloc] initWithTokenString:accessToken];
+  }
+  return [self initWithAccessTokenProvider:provider tokenUid:tokenUid transportConfig:transportConfig];
+}
+
+- (instancetype)initWithAccessTokenProvider:(id<DBAccessTokenProvider>)accessTokenProvider
+                                   tokenUid:(NSString *)tokenUid
+                            transportConfig:(DBTransportBaseConfig *)transportConfig {
   if (self = [super init]) {
-    _accessToken = accessToken;
+    _accessTokenProvider = accessTokenProvider;
     _tokenUid = [tokenUid copy];
     _appKey = transportConfig.appKey;
     _appSecret = transportConfig.appSecret;
     _hostnameConfig = transportConfig.hostnameConfig ?: [[DBTransportBaseHostnameConfig alloc] init];
-    NSString *defaultUserAgent = [NSString stringWithFormat:@"%@/%@", kV2SDKDefaultUserAgentPrefix, kV2SDKVersion];
+    NSString *defaultUserAgent = [DBTransportBaseConfig defaultUserAgent];
     _userAgent = transportConfig.userAgent ? [[transportConfig.userAgent stringByAppendingString:@"/"]
                                                  stringByAppendingString:defaultUserAgent]
                                            : defaultUserAgent;
@@ -53,13 +64,19 @@
                        byteOffsetStart:(NSNumber *)byteOffsetStart
                          byteOffsetEnd:(NSNumber *)byteOffsetEnd {
   NSString *routeStyle = routeAttributes[@"style"];
-  NSString *routeHost = routeAttributes[@"host"];
-  NSString *routeAuth = routeAttributes[@"auth"];
+
+  // routeAuthStr is one of user|team|app|noauth|app, user
+  NSString *routeAuthStr = routeAttributes[@"auth"];
+  NSArray *routeAuthsSplit = [routeAuthStr componentsSeparatedByString:@","];
+  NSMutableArray<NSString *> *routeAuths = [NSMutableArray array];
+  [routeAuthsSplit enumerateObjectsUsingBlock:^(NSString *_Nonnull obj, NSUInteger idx, BOOL *_Nonnull stop) {
+    [routeAuths addObject:[obj stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]];
+  }];
 
   NSMutableDictionary<NSString *, NSString *> *headers = [[NSMutableDictionary alloc] init];
   [headers setObject:_userAgent forKey:@"User-Agent"];
 
-  BOOL noauth = [routeHost isEqualToString:@"notify"];
+  BOOL noauth = [routeAuths containsObject:@"noauth"];
 
   if (!noauth) {
     if (_asMemberId) {
@@ -71,16 +88,17 @@
       [headers setObject:pathRootStr forKey:@"Dropbox-Api-Path-Root"];
     }
 
-    if (routeAuth && [routeAuth isEqualToString:@"app"]) {
-      if (!_appKey || !_appSecret) {
-        NSLog(@"App key and/or secret not properly configured. Use custom `DBTransportDefaultConfig` instance to set.");
-      }
+    // Order is important here. Route may support multiple auth types, so check from most specific to least.
+    if (([routeAuths containsObject:@"user"] || [routeAuths containsObject:@"team"]) && (_accessTokenProvider != nil)) {
+      [headers setObject:[NSString stringWithFormat:@"Bearer %@", _accessTokenProvider.accessToken]
+                  forKey:@"Authorization"];
+    } else if ([routeAuths containsObject:@"app"] && (_appKey != nil) && (_appSecret != nil)) {
       NSString *authString = [NSString stringWithFormat:@"%@:%@", _appKey, _appSecret];
       NSData *authData = [authString dataUsingEncoding:NSUTF8StringEncoding];
       [headers setObject:[NSString stringWithFormat:@"Basic %@", [authData base64EncodedStringWithOptions:0]]
                   forKey:@"Authorization"];
     } else {
-      [headers setObject:[NSString stringWithFormat:@"Bearer %@", _accessToken] forKey:@"Authorization"];
+      NSLog(@"Auth info not properly configured. Use custom `DBTransportDefaultConfig` instance to set.");
     }
   }
 
@@ -353,14 +371,6 @@
     }
   }
   return nil;
-}
-
-+ (NSString *)sdkVersion {
-  return kV2SDKVersion;
-}
-
-+ (NSString *)defaultUserAgent {
-  return kV2SDKDefaultUserAgentPrefix;
 }
 
 @end

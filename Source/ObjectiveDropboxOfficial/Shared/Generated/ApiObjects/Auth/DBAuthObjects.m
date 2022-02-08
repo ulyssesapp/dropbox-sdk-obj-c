@@ -102,9 +102,9 @@
   return [DBAUTHAccessErrorSerializer deserialize:dict];
 }
 
-#pragma mark - Description method
+#pragma mark - Debug Description method
 
-- (NSString *)description {
+- (NSString *)debugDescription {
   return [[DBAUTHAccessErrorSerializer serialize:self] description];
 }
 
@@ -125,10 +125,13 @@
   switch (_tag) {
   case DBAUTHAccessErrorInvalidAccountType:
     result = prime * result + [self.invalidAccountType hash];
+    break;
   case DBAUTHAccessErrorPaperAccessDenied:
     result = prime * result + [self.paperAccessDenied hash];
+    break;
   case DBAUTHAccessErrorOther:
     result = prime * result + [[self tagName] hash];
+    break;
   }
 
   return prime * result;
@@ -272,6 +275,14 @@
   return self;
 }
 
+- (instancetype)initWithRouteAccessDenied {
+  self = [super init];
+  if (self) {
+    _tag = DBAUTHAuthErrorRouteAccessDenied;
+  }
+  return self;
+}
+
 - (instancetype)initWithOther {
   self = [super init];
   if (self) {
@@ -316,6 +327,10 @@
   return _tag == DBAUTHAuthErrorMissingScope;
 }
 
+- (BOOL)isRouteAccessDenied {
+  return _tag == DBAUTHAuthErrorRouteAccessDenied;
+}
+
 - (BOOL)isOther {
   return _tag == DBAUTHAuthErrorOther;
 }
@@ -334,6 +349,8 @@
     return @"DBAUTHAuthErrorExpiredAccessToken";
   case DBAUTHAuthErrorMissingScope:
     return @"DBAUTHAuthErrorMissingScope";
+  case DBAUTHAuthErrorRouteAccessDenied:
+    return @"DBAUTHAuthErrorRouteAccessDenied";
   case DBAUTHAuthErrorOther:
     return @"DBAUTHAuthErrorOther";
   }
@@ -351,9 +368,9 @@
   return [DBAUTHAuthErrorSerializer deserialize:dict];
 }
 
-#pragma mark - Description method
+#pragma mark - Debug Description method
 
-- (NSString *)description {
+- (NSString *)debugDescription {
   return [[DBAUTHAuthErrorSerializer serialize:self] description];
 }
 
@@ -374,18 +391,28 @@
   switch (_tag) {
   case DBAUTHAuthErrorInvalidAccessToken:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBAUTHAuthErrorInvalidSelectUser:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBAUTHAuthErrorInvalidSelectAdmin:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBAUTHAuthErrorUserSuspended:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBAUTHAuthErrorExpiredAccessToken:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBAUTHAuthErrorMissingScope:
     result = prime * result + [self.missingScope hash];
+    break;
+  case DBAUTHAuthErrorRouteAccessDenied:
+    result = prime * result + [[self tagName] hash];
+    break;
   case DBAUTHAuthErrorOther:
     result = prime * result + [[self tagName] hash];
+    break;
   }
 
   return prime * result;
@@ -423,6 +450,8 @@
     return [[self tagName] isEqual:[anAuthError tagName]];
   case DBAUTHAuthErrorMissingScope:
     return [self.missingScope isEqual:anAuthError.missingScope];
+  case DBAUTHAuthErrorRouteAccessDenied:
+    return [[self tagName] isEqual:[anAuthError tagName]];
   case DBAUTHAuthErrorOther:
     return [[self tagName] isEqual:[anAuthError tagName]];
   }
@@ -451,6 +480,8 @@
   } else if ([valueObj isMissingScope]) {
     jsonDict = [[DBAUTHTokenScopeErrorSerializer serialize:valueObj.missingScope] mutableCopy];
     jsonDict[@".tag"] = @"missing_scope";
+  } else if ([valueObj isRouteAccessDenied]) {
+    jsonDict[@".tag"] = @"route_access_denied";
   } else if ([valueObj isOther]) {
     jsonDict[@".tag"] = @"other";
   } else {
@@ -476,6 +507,8 @@
   } else if ([tag isEqualToString:@"missing_scope"]) {
     DBAUTHTokenScopeError *missingScope = [DBAUTHTokenScopeErrorSerializer deserialize:valueDict];
     return [[DBAUTHAuthError alloc] initWithMissingScope:missingScope];
+  } else if ([tag isEqualToString:@"route_access_denied"]) {
+    return [[DBAUTHAuthError alloc] initWithRouteAccessDenied];
   } else if ([tag isEqualToString:@"other"]) {
     return [[DBAUTHAuthError alloc] initWithOther];
   } else {
@@ -558,9 +591,9 @@
   return [DBAUTHInvalidAccountTypeErrorSerializer deserialize:dict];
 }
 
-#pragma mark - Description method
+#pragma mark - Debug Description method
 
-- (NSString *)description {
+- (NSString *)debugDescription {
   return [[DBAUTHInvalidAccountTypeErrorSerializer serialize:self] description];
 }
 
@@ -581,10 +614,13 @@
   switch (_tag) {
   case DBAUTHInvalidAccountTypeErrorEndpoint:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBAUTHInvalidAccountTypeErrorFeature:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBAUTHInvalidAccountTypeErrorOther:
     result = prime * result + [[self tagName] hash];
+    break;
   }
 
   return prime * result;
@@ -731,9 +767,9 @@
   return [DBAUTHPaperAccessErrorSerializer deserialize:dict];
 }
 
-#pragma mark - Description method
+#pragma mark - Debug Description method
 
-- (NSString *)description {
+- (NSString *)debugDescription {
   return [[DBAUTHPaperAccessErrorSerializer serialize:self] description];
 }
 
@@ -754,10 +790,13 @@
   switch (_tag) {
   case DBAUTHPaperAccessErrorPaperDisabled:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBAUTHPaperAccessErrorNotPaperUser:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBAUTHPaperAccessErrorOther:
     result = prime * result + [[self tagName] hash];
+    break;
   }
 
   return prime * result;
@@ -867,9 +906,9 @@
   return [DBAUTHRateLimitErrorSerializer deserialize:dict];
 }
 
-#pragma mark - Description method
+#pragma mark - Debug Description method
 
-- (NSString *)description {
+- (NSString *)debugDescription {
   return [[DBAUTHRateLimitErrorSerializer serialize:self] description];
 }
 
@@ -1015,9 +1054,9 @@
   return [DBAUTHRateLimitReasonSerializer deserialize:dict];
 }
 
-#pragma mark - Description method
+#pragma mark - Debug Description method
 
-- (NSString *)description {
+- (NSString *)debugDescription {
   return [[DBAUTHRateLimitReasonSerializer serialize:self] description];
 }
 
@@ -1038,10 +1077,13 @@
   switch (_tag) {
   case DBAUTHRateLimitReasonTooManyRequests:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBAUTHRateLimitReasonTooManyWriteOperations:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBAUTHRateLimitReasonOther:
     result = prime * result + [[self tagName] hash];
+    break;
   }
 
   return prime * result;
@@ -1148,9 +1190,9 @@
   return [DBAUTHTokenFromOAuth1ArgSerializer deserialize:dict];
 }
 
-#pragma mark - Description method
+#pragma mark - Debug Description method
 
-- (NSString *)description {
+- (NSString *)debugDescription {
   return [[DBAUTHTokenFromOAuth1ArgSerializer serialize:self] description];
 }
 
@@ -1296,9 +1338,9 @@
   return [DBAUTHTokenFromOAuth1ErrorSerializer deserialize:dict];
 }
 
-#pragma mark - Description method
+#pragma mark - Debug Description method
 
-- (NSString *)description {
+- (NSString *)debugDescription {
   return [[DBAUTHTokenFromOAuth1ErrorSerializer serialize:self] description];
 }
 
@@ -1319,10 +1361,13 @@
   switch (_tag) {
   case DBAUTHTokenFromOAuth1ErrorInvalidOauth1TokenInfo:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBAUTHTokenFromOAuth1ErrorAppIdMismatch:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBAUTHTokenFromOAuth1ErrorOther:
     result = prime * result + [[self tagName] hash];
+    break;
   }
 
   return prime * result;
@@ -1426,9 +1471,9 @@
   return [DBAUTHTokenFromOAuth1ResultSerializer deserialize:dict];
 }
 
-#pragma mark - Description method
+#pragma mark - Debug Description method
 
-- (NSString *)description {
+- (NSString *)debugDescription {
   return [[DBAUTHTokenFromOAuth1ResultSerializer serialize:self] description];
 }
 
@@ -1525,9 +1570,9 @@
   return [DBAUTHTokenScopeErrorSerializer deserialize:dict];
 }
 
-#pragma mark - Description method
+#pragma mark - Debug Description method
 
-- (NSString *)description {
+- (NSString *)debugDescription {
   return [[DBAUTHTokenScopeErrorSerializer serialize:self] description];
 }
 

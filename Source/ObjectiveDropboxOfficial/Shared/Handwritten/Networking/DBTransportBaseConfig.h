@@ -41,6 +41,9 @@ NS_ASSUME_NONNULL_BEGIN
 /// Additional HTTP headers to be injected into each client request.
 @property (nonatomic, readonly, copy, nullable) NSDictionary<NSString *, NSString *> *additionalHeaders;
 
+/// @return A default user agent string.
++ (NSString *)defaultUserAgent;
+
 ///
 /// Convenience constructor.
 ///
@@ -67,6 +70,21 @@ NS_ASSUME_NONNULL_BEGIN
                      appSecret:(nullable NSString *)appSecret
                      userAgent:(nullable NSString *)userAgent;
 
+///
+/// Convenience constructor.
+///
+/// @param appKey The consumer app key associated with the app that is integrating with the Dropbox API. Here, app key
+/// is used for querying endpoints the have "app auth" authentication type.
+/// @param appSecret The consumer app secret associated with the app that is integrating with the Dropbox API. Here, app
+/// key is used for querying endpoints the have "app auth" authentication type.
+/// @param userAgent The user agent associated with all networking requests. Used for server logging.
+/// @param hostnameConfig A set of custom hostnames to use for networking requests.
+///
+/// @return An initialized instance.
+- (instancetype)initWithAppKey:(nullable NSString *)appKey
+                     appSecret:(nullable NSString *)appSecret
+                     userAgent:(nullable NSString *)userAgent
+                hostnameConfig:(DBTransportBaseHostnameConfig *)hostnameConfig;
 ///
 /// Convenience constructor.
 ///

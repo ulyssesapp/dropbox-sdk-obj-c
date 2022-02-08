@@ -9,6 +9,7 @@
 #import "DBSerializableProtocol.h"
 #import "DBTEAMLOGUserLogInfo.h"
 
+@class DBTEAMLOGTeamLogInfo;
 @class DBTEAMLOGTeamMemberLogInfo;
 
 NS_ASSUME_NONNULL_BEGIN
@@ -28,26 +29,26 @@ NS_ASSUME_NONNULL_BEGIN
 
 #pragma mark - Instance fields
 
-/// Team member ID. Might be missing due to historical data gap.
+/// Team member ID.
 @property (nonatomic, readonly, copy, nullable) NSString *teamMemberId;
 
 /// Team member external ID.
 @property (nonatomic, readonly, copy, nullable) NSString *memberExternalId;
+
+/// Details about this user&#x2019s team for enterprise event.
+@property (nonatomic, readonly, nullable) DBTEAMLOGTeamLogInfo *team;
 
 #pragma mark - Constructors
 
 ///
 /// Full constructor for the struct (exposes all instance variables).
 ///
-/// @param accountId User unique ID. Might be missing due to historical data
-/// gap.
-/// @param displayName User display name. Might be missing due to historical
-/// data gap.
-/// @param email User email address. Might be missing due to historical data
-/// gap.
-/// @param teamMemberId Team member ID. Might be missing due to historical data
-/// gap.
+/// @param accountId User unique ID.
+/// @param displayName User display name.
+/// @param email User email address.
+/// @param teamMemberId Team member ID.
 /// @param memberExternalId Team member external ID.
+/// @param team Details about this user&#x2019s team for enterprise event.
 ///
 /// @return An initialized instance.
 ///
@@ -55,7 +56,8 @@ NS_ASSUME_NONNULL_BEGIN
                       displayName:(nullable NSString *)displayName
                             email:(nullable NSString *)email
                      teamMemberId:(nullable NSString *)teamMemberId
-                 memberExternalId:(nullable NSString *)memberExternalId;
+                 memberExternalId:(nullable NSString *)memberExternalId
+                             team:(nullable DBTEAMLOGTeamLogInfo *)team;
 
 ///
 /// Convenience constructor (exposes only non-nullable instance variables with

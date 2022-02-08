@@ -28,30 +28,38 @@ NS_ASSUME_NONNULL_BEGIN
 
 /// The `DBFILESUploadSessionLookupErrorTag` enum type represents the possible
 /// tag states with which the `DBFILESUploadSessionLookupError` union can exist.
-typedef NS_ENUM(NSInteger, DBFILESUploadSessionLookupErrorTag) {
-  /// The upload session ID was not found or has expired. Upload sessions are
-  /// valid for 48 hours.
-  DBFILESUploadSessionLookupErrorNotFound,
+typedef NS_CLOSED_ENUM(NSInteger, DBFILESUploadSessionLookupErrorTag){
+    /// The upload session ID was not found or has expired. Upload sessions are
+    /// valid for 7 days.
+    DBFILESUploadSessionLookupErrorNotFound,
 
-  /// The specified offset was incorrect. See the value for the correct
-  /// offset. This error may occur when a previous request was received and
-  /// processed successfully but the client did not receive the response, e.g.
-  /// due to a network error.
-  DBFILESUploadSessionLookupErrorIncorrectOffset,
+    /// The specified offset was incorrect. See the value for the correct
+    /// offset. This error may occur when a previous request was received and
+    /// processed successfully but the client did not receive the response, e.g.
+    /// due to a network error.
+    DBFILESUploadSessionLookupErrorIncorrectOffset,
 
-  /// You are attempting to append data to an upload session that has already
-  /// been closed (i.e. committed).
-  DBFILESUploadSessionLookupErrorClosed,
+    /// You are attempting to append data to an upload session that has already
+    /// been closed (i.e. committed).
+    DBFILESUploadSessionLookupErrorClosed,
 
-  /// The session must be closed before calling upload_session/finish_batch.
-  DBFILESUploadSessionLookupErrorNotClosed,
+    /// The session must be closed before calling upload_session/finish_batch.
+    DBFILESUploadSessionLookupErrorNotClosed,
 
-  /// You can not append to the upload session because the size of a file
-  /// should not reach the max file size limit (i.e. 350GB).
-  DBFILESUploadSessionLookupErrorTooLarge,
+    /// You can not append to the upload session because the size of a file
+    /// should not reach the max file size limit (i.e. 350GB).
+    DBFILESUploadSessionLookupErrorTooLarge,
 
-  /// (no description).
-  DBFILESUploadSessionLookupErrorOther,
+    /// For concurrent upload sessions, offset needs to be multiple of 4194304
+    /// bytes.
+    DBFILESUploadSessionLookupErrorConcurrentSessionInvalidOffset,
+
+    /// For concurrent upload sessions, only chunks with size multiple of
+    /// 4194304 bytes can be uploaded.
+    DBFILESUploadSessionLookupErrorConcurrentSessionInvalidDataSize,
+
+    /// (no description).
+    DBFILESUploadSessionLookupErrorOther,
 
 };
 
@@ -71,7 +79,7 @@ typedef NS_ENUM(NSInteger, DBFILESUploadSessionLookupErrorTag) {
 /// Initializes union class with tag state of "not_found".
 ///
 /// Description of the "not_found" tag state: The upload session ID was not
-/// found or has expired. Upload sessions are valid for 48 hours.
+/// found or has expired. Upload sessions are valid for 7 days.
 ///
 /// @return An initialized instance.
 ///
@@ -126,6 +134,29 @@ typedef NS_ENUM(NSInteger, DBFILESUploadSessionLookupErrorTag) {
 - (instancetype)initWithTooLarge;
 
 ///
+/// Initializes union class with tag state of
+/// "concurrent_session_invalid_offset".
+///
+/// Description of the "concurrent_session_invalid_offset" tag state: For
+/// concurrent upload sessions, offset needs to be multiple of 4194304 bytes.
+///
+/// @return An initialized instance.
+///
+- (instancetype)initWithConcurrentSessionInvalidOffset;
+
+///
+/// Initializes union class with tag state of
+/// "concurrent_session_invalid_data_size".
+///
+/// Description of the "concurrent_session_invalid_data_size" tag state: For
+/// concurrent upload sessions, only chunks with size multiple of 4194304 bytes
+/// can be uploaded.
+///
+/// @return An initialized instance.
+///
+- (instancetype)initWithConcurrentSessionInvalidDataSize;
+
+///
 /// Initializes union class with tag state of "other".
 ///
 /// @return An initialized instance.
@@ -174,6 +205,24 @@ typedef NS_ENUM(NSInteger, DBFILESUploadSessionLookupErrorTag) {
 /// @return Whether the union's current tag state has value "too_large".
 ///
 - (BOOL)isTooLarge;
+
+///
+/// Retrieves whether the union's current tag state has value
+/// "concurrent_session_invalid_offset".
+///
+/// @return Whether the union's current tag state has value
+/// "concurrent_session_invalid_offset".
+///
+- (BOOL)isConcurrentSessionInvalidOffset;
+
+///
+/// Retrieves whether the union's current tag state has value
+/// "concurrent_session_invalid_data_size".
+///
+/// @return Whether the union's current tag state has value
+/// "concurrent_session_invalid_data_size".
+///
+- (BOOL)isConcurrentSessionInvalidDataSize;
 
 ///
 /// Retrieves whether the union's current tag state has value "other".

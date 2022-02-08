@@ -33,56 +33,51 @@ NS_ASSUME_NONNULL_BEGIN
 
 /// The `DBTEAMMemberAddResultTag` enum type represents the possible tag states
 /// with which the `DBTEAMMemberAddResult` union can exist.
-typedef NS_ENUM(NSInteger, DBTEAMMemberAddResultTag) {
-  /// Describes a user that was successfully added to the team.
-  DBTEAMMemberAddResultSuccess,
+typedef NS_CLOSED_ENUM(NSInteger, DBTEAMMemberAddResultTag){
+    /// Team is already full. The organization has no available licenses.
+    DBTEAMMemberAddResultTeamLicenseLimit,
 
-  /// Team is already full. The organization has no available licenses.
-  DBTEAMMemberAddResultTeamLicenseLimit,
+    /// Team is already full. The free team member limit has been reached.
+    DBTEAMMemberAddResultFreeTeamMemberLimitReached,
 
-  /// Team is already full. The free team member limit has been reached.
-  DBTEAMMemberAddResultFreeTeamMemberLimitReached,
+    /// User is already on this team. The provided email address is associated
+    /// with a user who is already a member of (including in recoverable state)
+    /// or invited to the team.
+    DBTEAMMemberAddResultUserAlreadyOnTeam,
 
-  /// User is already on this team. The provided email address is associated
-  /// with a user who is already a member of (including in recoverable state)
-  /// or invited to the team.
-  DBTEAMMemberAddResultUserAlreadyOnTeam,
+    /// User is already on another team. The provided email address is
+    /// associated with a user that is already a member or invited to another
+    /// team.
+    DBTEAMMemberAddResultUserOnAnotherTeam,
 
-  /// User is already on another team. The provided email address is
-  /// associated with a user that is already a member or invited to another
-  /// team.
-  DBTEAMMemberAddResultUserOnAnotherTeam,
+    /// User is already paired.
+    DBTEAMMemberAddResultUserAlreadyPaired,
 
-  /// User is already paired.
-  DBTEAMMemberAddResultUserAlreadyPaired,
+    /// User migration has failed.
+    DBTEAMMemberAddResultUserMigrationFailed,
 
-  /// User migration has failed.
-  DBTEAMMemberAddResultUserMigrationFailed,
+    /// A user with the given external member ID already exists on the team
+    /// (including in recoverable state).
+    DBTEAMMemberAddResultDuplicateExternalMemberId,
 
-  /// A user with the given external member ID already exists on the team
-  /// (including in recoverable state).
-  DBTEAMMemberAddResultDuplicateExternalMemberId,
+    /// A user with the given persistent ID already exists on the team
+    /// (including in recoverable state).
+    DBTEAMMemberAddResultDuplicateMemberPersistentId,
 
-  /// A user with the given persistent ID already exists on the team
-  /// (including in recoverable state).
-  DBTEAMMemberAddResultDuplicateMemberPersistentId,
+    /// Persistent ID is only available to teams with persistent ID SAML
+    /// configuration. Please contact Dropbox for more information.
+    DBTEAMMemberAddResultPersistentIdDisabled,
 
-  /// Persistent ID is only available to teams with persistent ID SAML
-  /// configuration. Please contact Dropbox for more information.
-  DBTEAMMemberAddResultPersistentIdDisabled,
+    /// User creation has failed.
+    DBTEAMMemberAddResultUserCreationFailed,
 
-  /// User creation has failed.
-  DBTEAMMemberAddResultUserCreationFailed,
+    /// Describes a user that was successfully added to the team.
+    DBTEAMMemberAddResultSuccess,
 
 };
 
 /// Represents the union's current tag state.
 @property (nonatomic, readonly) DBTEAMMemberAddResultTag tag;
-
-/// Describes a user that was successfully added to the team. @note Ensure the
-/// `isSuccess` method returns true before accessing, otherwise a runtime
-/// exception will be raised.
-@property (nonatomic, readonly) DBTEAMTeamMemberInfo *success;
 
 /// Team is already full. The organization has no available licenses. @note
 /// Ensure the `isTeamLicenseLimit` method returns true before accessing,
@@ -135,19 +130,12 @@ typedef NS_ENUM(NSInteger, DBTEAMMemberAddResultTag) {
 /// returns true before accessing, otherwise a runtime exception will be raised.
 @property (nonatomic, readonly, copy) NSString *userCreationFailed;
 
-#pragma mark - Constructors
+/// Describes a user that was successfully added to the team. @note Ensure the
+/// `isSuccess` method returns true before accessing, otherwise a runtime
+/// exception will be raised.
+@property (nonatomic, readonly) DBTEAMTeamMemberInfo *success;
 
-///
-/// Initializes union class with tag state of "success".
-///
-/// Description of the "success" tag state: Describes a user that was
-/// successfully added to the team.
-///
-/// @param success Describes a user that was successfully added to the team.
-///
-/// @return An initialized instance.
-///
-- (instancetype)initWithSuccess:(DBTEAMTeamMemberInfo *)success;
+#pragma mark - Constructors
 
 ///
 /// Initializes union class with tag state of "team_license_limit".
@@ -283,19 +271,21 @@ typedef NS_ENUM(NSInteger, DBTEAMMemberAddResultTag) {
 ///
 - (instancetype)initWithUserCreationFailed:(NSString *)userCreationFailed;
 
+///
+/// Initializes union class with tag state of "success".
+///
+/// Description of the "success" tag state: Describes a user that was
+/// successfully added to the team.
+///
+/// @param success Describes a user that was successfully added to the team.
+///
+/// @return An initialized instance.
+///
+- (instancetype)initWithSuccess:(DBTEAMTeamMemberInfo *)success;
+
 - (instancetype)init NS_UNAVAILABLE;
 
 #pragma mark - Tag state methods
-
-///
-/// Retrieves whether the union's current tag state has value "success".
-///
-/// @note Call this method and ensure it returns true before accessing the
-/// `success` property, otherwise a runtime exception will be thrown.
-///
-/// @return Whether the union's current tag state has value "success".
-///
-- (BOOL)isSuccess;
 
 ///
 /// Retrieves whether the union's current tag state has value
@@ -421,6 +411,16 @@ typedef NS_ENUM(NSInteger, DBTEAMMemberAddResultTag) {
 /// "user_creation_failed".
 ///
 - (BOOL)isUserCreationFailed;
+
+///
+/// Retrieves whether the union's current tag state has value "success".
+///
+/// @note Call this method and ensure it returns true before accessing the
+/// `success` property, otherwise a runtime exception will be thrown.
+///
+/// @return Whether the union's current tag state has value "success".
+///
+- (BOOL)isSuccess;
 
 ///
 /// Retrieves string value of union's current tag state.

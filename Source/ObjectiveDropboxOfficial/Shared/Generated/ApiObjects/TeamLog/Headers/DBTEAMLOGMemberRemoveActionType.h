@@ -27,21 +27,21 @@ NS_ASSUME_NONNULL_BEGIN
 
 /// The `DBTEAMLOGMemberRemoveActionTypeTag` enum type represents the possible
 /// tag states with which the `DBTEAMLOGMemberRemoveActionType` union can exist.
-typedef NS_ENUM(NSInteger, DBTEAMLOGMemberRemoveActionTypeTag) {
-  /// (no description).
-  DBTEAMLOGMemberRemoveActionTypeDelete_,
+typedef NS_CLOSED_ENUM(NSInteger, DBTEAMLOGMemberRemoveActionTypeTag){
+    /// (no description).
+    DBTEAMLOGMemberRemoveActionTypeDelete_,
 
-  /// (no description).
-  DBTEAMLOGMemberRemoveActionTypeOffboard,
+    /// (no description).
+    DBTEAMLOGMemberRemoveActionTypeLeave,
 
-  /// (no description).
-  DBTEAMLOGMemberRemoveActionTypeLeave,
+    /// (no description).
+    DBTEAMLOGMemberRemoveActionTypeOffboard,
 
-  /// (no description).
-  DBTEAMLOGMemberRemoveActionTypeOffboardAndRetainTeamFolders,
+    /// (no description).
+    DBTEAMLOGMemberRemoveActionTypeOffboardAndRetainTeamFolders,
 
-  /// (no description).
-  DBTEAMLOGMemberRemoveActionTypeOther,
+    /// (no description).
+    DBTEAMLOGMemberRemoveActionTypeOther,
 
 };
 
@@ -58,18 +58,18 @@ typedef NS_ENUM(NSInteger, DBTEAMLOGMemberRemoveActionTypeTag) {
 - (instancetype)initWithDelete_;
 
 ///
-/// Initializes union class with tag state of "offboard".
-///
-/// @return An initialized instance.
-///
-- (instancetype)initWithOffboard;
-
-///
 /// Initializes union class with tag state of "leave".
 ///
 /// @return An initialized instance.
 ///
 - (instancetype)initWithLeave;
+
+///
+/// Initializes union class with tag state of "offboard".
+///
+/// @return An initialized instance.
+///
+- (instancetype)initWithOffboard;
 
 ///
 /// Initializes union class with tag state of
@@ -98,18 +98,18 @@ typedef NS_ENUM(NSInteger, DBTEAMLOGMemberRemoveActionTypeTag) {
 - (BOOL)isDelete_;
 
 ///
-/// Retrieves whether the union's current tag state has value "offboard".
-///
-/// @return Whether the union's current tag state has value "offboard".
-///
-- (BOOL)isOffboard;
-
-///
 /// Retrieves whether the union's current tag state has value "leave".
 ///
 /// @return Whether the union's current tag state has value "leave".
 ///
 - (BOOL)isLeave;
+
+///
+/// Retrieves whether the union's current tag state has value "offboard".
+///
+/// @return Whether the union's current tag state has value "offboard".
+///
+- (BOOL)isOffboard;
 
 ///
 /// Retrieves whether the union's current tag state has value

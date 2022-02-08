@@ -149,9 +149,9 @@
   return [DBSEENSTATEPlatformTypeSerializer deserialize:dict];
 }
 
-#pragma mark - Description method
+#pragma mark - Debug Description method
 
-- (NSString *)description {
+- (NSString *)debugDescription {
   return [[DBSEENSTATEPlatformTypeSerializer serialize:self] description];
 }
 
@@ -172,20 +172,28 @@
   switch (_tag) {
   case DBSEENSTATEPlatformTypeWeb:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBSEENSTATEPlatformTypeDesktop:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBSEENSTATEPlatformTypeMobileIos:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBSEENSTATEPlatformTypeMobileAndroid:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBSEENSTATEPlatformTypeApi:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBSEENSTATEPlatformTypeUnknown:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBSEENSTATEPlatformTypeMobile:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBSEENSTATEPlatformTypeOther:
     result = prime * result + [[self tagName] hash];
+    break;
   }
 
   return prime * result;

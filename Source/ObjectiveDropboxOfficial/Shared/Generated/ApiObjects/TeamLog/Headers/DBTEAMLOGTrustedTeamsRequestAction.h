@@ -28,24 +28,24 @@ NS_ASSUME_NONNULL_BEGIN
 /// The `DBTEAMLOGTrustedTeamsRequestActionTag` enum type represents the
 /// possible tag states with which the `DBTEAMLOGTrustedTeamsRequestAction`
 /// union can exist.
-typedef NS_ENUM(NSInteger, DBTEAMLOGTrustedTeamsRequestActionTag) {
-  /// (no description).
-  DBTEAMLOGTrustedTeamsRequestActionInvited,
+typedef NS_CLOSED_ENUM(NSInteger, DBTEAMLOGTrustedTeamsRequestActionTag){
+    /// (no description).
+    DBTEAMLOGTrustedTeamsRequestActionAccepted,
 
-  /// (no description).
-  DBTEAMLOGTrustedTeamsRequestActionExpired,
+    /// (no description).
+    DBTEAMLOGTrustedTeamsRequestActionDeclined,
 
-  /// (no description).
-  DBTEAMLOGTrustedTeamsRequestActionRevoked,
+    /// (no description).
+    DBTEAMLOGTrustedTeamsRequestActionExpired,
 
-  /// (no description).
-  DBTEAMLOGTrustedTeamsRequestActionAccepted,
+    /// (no description).
+    DBTEAMLOGTrustedTeamsRequestActionInvited,
 
-  /// (no description).
-  DBTEAMLOGTrustedTeamsRequestActionDeclined,
+    /// (no description).
+    DBTEAMLOGTrustedTeamsRequestActionRevoked,
 
-  /// (no description).
-  DBTEAMLOGTrustedTeamsRequestActionOther,
+    /// (no description).
+    DBTEAMLOGTrustedTeamsRequestActionOther,
 
 };
 
@@ -53,27 +53,6 @@ typedef NS_ENUM(NSInteger, DBTEAMLOGTrustedTeamsRequestActionTag) {
 @property (nonatomic, readonly) DBTEAMLOGTrustedTeamsRequestActionTag tag;
 
 #pragma mark - Constructors
-
-///
-/// Initializes union class with tag state of "invited".
-///
-/// @return An initialized instance.
-///
-- (instancetype)initWithInvited;
-
-///
-/// Initializes union class with tag state of "expired".
-///
-/// @return An initialized instance.
-///
-- (instancetype)initWithExpired;
-
-///
-/// Initializes union class with tag state of "revoked".
-///
-/// @return An initialized instance.
-///
-- (instancetype)initWithRevoked;
 
 ///
 /// Initializes union class with tag state of "accepted".
@@ -90,6 +69,27 @@ typedef NS_ENUM(NSInteger, DBTEAMLOGTrustedTeamsRequestActionTag) {
 - (instancetype)initWithDeclined;
 
 ///
+/// Initializes union class with tag state of "expired".
+///
+/// @return An initialized instance.
+///
+- (instancetype)initWithExpired;
+
+///
+/// Initializes union class with tag state of "invited".
+///
+/// @return An initialized instance.
+///
+- (instancetype)initWithInvited;
+
+///
+/// Initializes union class with tag state of "revoked".
+///
+/// @return An initialized instance.
+///
+- (instancetype)initWithRevoked;
+
+///
 /// Initializes union class with tag state of "other".
 ///
 /// @return An initialized instance.
@@ -99,27 +99,6 @@ typedef NS_ENUM(NSInteger, DBTEAMLOGTrustedTeamsRequestActionTag) {
 - (instancetype)init NS_UNAVAILABLE;
 
 #pragma mark - Tag state methods
-
-///
-/// Retrieves whether the union's current tag state has value "invited".
-///
-/// @return Whether the union's current tag state has value "invited".
-///
-- (BOOL)isInvited;
-
-///
-/// Retrieves whether the union's current tag state has value "expired".
-///
-/// @return Whether the union's current tag state has value "expired".
-///
-- (BOOL)isExpired;
-
-///
-/// Retrieves whether the union's current tag state has value "revoked".
-///
-/// @return Whether the union's current tag state has value "revoked".
-///
-- (BOOL)isRevoked;
 
 ///
 /// Retrieves whether the union's current tag state has value "accepted".
@@ -134,6 +113,27 @@ typedef NS_ENUM(NSInteger, DBTEAMLOGTrustedTeamsRequestActionTag) {
 /// @return Whether the union's current tag state has value "declined".
 ///
 - (BOOL)isDeclined;
+
+///
+/// Retrieves whether the union's current tag state has value "expired".
+///
+/// @return Whether the union's current tag state has value "expired".
+///
+- (BOOL)isExpired;
+
+///
+/// Retrieves whether the union's current tag state has value "invited".
+///
+/// @return Whether the union's current tag state has value "invited".
+///
+- (BOOL)isInvited;
+
+///
+/// Retrieves whether the union's current tag state has value "revoked".
+///
+/// @return Whether the union's current tag state has value "revoked".
+///
+- (BOOL)isRevoked;
 
 ///
 /// Retrieves whether the union's current tag state has value "other".

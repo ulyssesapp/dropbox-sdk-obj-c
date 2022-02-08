@@ -11,6 +11,7 @@
 @class DBTEAMLOGActionDetails;
 @class DBTEAMLOGJoinTeamDetails;
 @class DBTEAMLOGMemberRemoveActionType;
+@class DBTEAMLOGTeamInviteDetails;
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -32,32 +33,65 @@ NS_ASSUME_NONNULL_BEGIN
 
 /// The `DBTEAMLOGActionDetailsTag` enum type represents the possible tag states
 /// with which the `DBTEAMLOGActionDetails` union can exist.
-typedef NS_ENUM(NSInteger, DBTEAMLOGActionDetailsTag) {
-  /// Additional information relevant when a new member joins the team.
-  DBTEAMLOGActionDetailsTeamJoinDetails,
+typedef NS_CLOSED_ENUM(NSInteger, DBTEAMLOGActionDetailsTag){
+    /// Define how the user was removed from the team.
+    DBTEAMLOGActionDetailsRemoveAction,
 
-  /// Define how the user was removed from the team.
-  DBTEAMLOGActionDetailsRemoveAction,
+    /// Additional information relevant when someone is invited to the team.
+    DBTEAMLOGActionDetailsTeamInviteDetails,
 
-  /// (no description).
-  DBTEAMLOGActionDetailsOther,
+    /// Additional information relevant when a new member joins the team.
+    DBTEAMLOGActionDetailsTeamJoinDetails,
+
+    /// (no description).
+    DBTEAMLOGActionDetailsOther,
 
 };
 
 /// Represents the union's current tag state.
 @property (nonatomic, readonly) DBTEAMLOGActionDetailsTag tag;
 
-/// Additional information relevant when a new member joins the team. @note
-/// Ensure the `isTeamJoinDetails` method returns true before accessing,
-/// otherwise a runtime exception will be raised.
-@property (nonatomic, readonly) DBTEAMLOGJoinTeamDetails *teamJoinDetails;
-
 /// Define how the user was removed from the team. @note Ensure the
 /// `isRemoveAction` method returns true before accessing, otherwise a runtime
 /// exception will be raised.
 @property (nonatomic, readonly) DBTEAMLOGMemberRemoveActionType *removeAction;
 
+/// Additional information relevant when someone is invited to the team. @note
+/// Ensure the `isTeamInviteDetails` method returns true before accessing,
+/// otherwise a runtime exception will be raised.
+@property (nonatomic, readonly) DBTEAMLOGTeamInviteDetails *teamInviteDetails;
+
+/// Additional information relevant when a new member joins the team. @note
+/// Ensure the `isTeamJoinDetails` method returns true before accessing,
+/// otherwise a runtime exception will be raised.
+@property (nonatomic, readonly) DBTEAMLOGJoinTeamDetails *teamJoinDetails;
+
 #pragma mark - Constructors
+
+///
+/// Initializes union class with tag state of "remove_action".
+///
+/// Description of the "remove_action" tag state: Define how the user was
+/// removed from the team.
+///
+/// @param removeAction Define how the user was removed from the team.
+///
+/// @return An initialized instance.
+///
+- (instancetype)initWithRemoveAction:(DBTEAMLOGMemberRemoveActionType *)removeAction;
+
+///
+/// Initializes union class with tag state of "team_invite_details".
+///
+/// Description of the "team_invite_details" tag state: Additional information
+/// relevant when someone is invited to the team.
+///
+/// @param teamInviteDetails Additional information relevant when someone is
+/// invited to the team.
+///
+/// @return An initialized instance.
+///
+- (instancetype)initWithTeamInviteDetails:(DBTEAMLOGTeamInviteDetails *)teamInviteDetails;
 
 ///
 /// Initializes union class with tag state of "team_join_details".
@@ -73,18 +107,6 @@ typedef NS_ENUM(NSInteger, DBTEAMLOGActionDetailsTag) {
 - (instancetype)initWithTeamJoinDetails:(DBTEAMLOGJoinTeamDetails *)teamJoinDetails;
 
 ///
-/// Initializes union class with tag state of "remove_action".
-///
-/// Description of the "remove_action" tag state: Define how the user was
-/// removed from the team.
-///
-/// @param removeAction Define how the user was removed from the team.
-///
-/// @return An initialized instance.
-///
-- (instancetype)initWithRemoveAction:(DBTEAMLOGMemberRemoveActionType *)removeAction;
-
-///
 /// Initializes union class with tag state of "other".
 ///
 /// @return An initialized instance.
@@ -96,6 +118,28 @@ typedef NS_ENUM(NSInteger, DBTEAMLOGActionDetailsTag) {
 #pragma mark - Tag state methods
 
 ///
+/// Retrieves whether the union's current tag state has value "remove_action".
+///
+/// @note Call this method and ensure it returns true before accessing the
+/// `removeAction` property, otherwise a runtime exception will be thrown.
+///
+/// @return Whether the union's current tag state has value "remove_action".
+///
+- (BOOL)isRemoveAction;
+
+///
+/// Retrieves whether the union's current tag state has value
+/// "team_invite_details".
+///
+/// @note Call this method and ensure it returns true before accessing the
+/// `teamInviteDetails` property, otherwise a runtime exception will be thrown.
+///
+/// @return Whether the union's current tag state has value
+/// "team_invite_details".
+///
+- (BOOL)isTeamInviteDetails;
+
+///
 /// Retrieves whether the union's current tag state has value
 /// "team_join_details".
 ///
@@ -105,16 +149,6 @@ typedef NS_ENUM(NSInteger, DBTEAMLOGActionDetailsTag) {
 /// @return Whether the union's current tag state has value "team_join_details".
 ///
 - (BOOL)isTeamJoinDetails;
-
-///
-/// Retrieves whether the union's current tag state has value "remove_action".
-///
-/// @note Call this method and ensure it returns true before accessing the
-/// `removeAction` property, otherwise a runtime exception will be thrown.
-///
-/// @return Whether the union's current tag state has value "remove_action".
-///
-- (BOOL)isRemoveAction;
 
 ///
 /// Retrieves whether the union's current tag state has value "other".

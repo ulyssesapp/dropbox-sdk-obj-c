@@ -62,9 +62,9 @@
   return [DBASYNCLaunchResultBaseSerializer deserialize:dict];
 }
 
-#pragma mark - Description method
+#pragma mark - Debug Description method
 
-- (NSString *)description {
+- (NSString *)debugDescription {
   return [[DBASYNCLaunchResultBaseSerializer serialize:self] description];
 }
 
@@ -85,6 +85,7 @@
   switch (_tag) {
   case DBASYNCLaunchResultBaseAsyncJobId:
     result = prime * result + [self.asyncJobId hash];
+    break;
   }
 
   return prime * result;
@@ -224,9 +225,9 @@
   return [DBASYNCLaunchEmptyResultSerializer deserialize:dict];
 }
 
-#pragma mark - Description method
+#pragma mark - Debug Description method
 
-- (NSString *)description {
+- (NSString *)debugDescription {
   return [[DBASYNCLaunchEmptyResultSerializer serialize:self] description];
 }
 
@@ -247,8 +248,10 @@
   switch (_tag) {
   case DBASYNCLaunchEmptyResultAsyncJobId:
     result = prime * result + [self.asyncJobId hash];
+    break;
   case DBASYNCLaunchEmptyResultComplete:
     result = prime * result + [[self tagName] hash];
+    break;
   }
 
   return prime * result;
@@ -353,9 +356,9 @@
   return [DBASYNCPollArgSerializer deserialize:dict];
 }
 
-#pragma mark - Description method
+#pragma mark - Debug Description method
 
-- (NSString *)description {
+- (NSString *)debugDescription {
   return [[DBASYNCPollArgSerializer serialize:self] description];
 }
 
@@ -467,9 +470,9 @@
   return [DBASYNCPollResultBaseSerializer deserialize:dict];
 }
 
-#pragma mark - Description method
+#pragma mark - Debug Description method
 
-- (NSString *)description {
+- (NSString *)debugDescription {
   return [[DBASYNCPollResultBaseSerializer serialize:self] description];
 }
 
@@ -490,6 +493,7 @@
   switch (_tag) {
   case DBASYNCPollResultBaseInProgress:
     result = prime * result + [[self tagName] hash];
+    break;
   }
 
   return prime * result;
@@ -616,9 +620,9 @@
   return [DBASYNCPollEmptyResultSerializer deserialize:dict];
 }
 
-#pragma mark - Description method
+#pragma mark - Debug Description method
 
-- (NSString *)description {
+- (NSString *)debugDescription {
   return [[DBASYNCPollEmptyResultSerializer serialize:self] description];
 }
 
@@ -639,8 +643,10 @@
   switch (_tag) {
   case DBASYNCPollEmptyResultInProgress:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBASYNCPollEmptyResultComplete:
     result = prime * result + [[self tagName] hash];
+    break;
   }
 
   return prime * result;
@@ -786,9 +792,9 @@
   return [DBASYNCPollErrorSerializer deserialize:dict];
 }
 
-#pragma mark - Description method
+#pragma mark - Debug Description method
 
-- (NSString *)description {
+- (NSString *)debugDescription {
   return [[DBASYNCPollErrorSerializer serialize:self] description];
 }
 
@@ -809,10 +815,13 @@
   switch (_tag) {
   case DBASYNCPollErrorInvalidAsyncJobId:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBASYNCPollErrorInternalError:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBASYNCPollErrorOther:
     result = prime * result + [[self tagName] hash];
+    break;
   }
 
   return prime * result;

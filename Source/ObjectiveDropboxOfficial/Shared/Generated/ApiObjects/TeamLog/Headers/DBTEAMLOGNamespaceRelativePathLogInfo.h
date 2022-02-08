@@ -27,25 +27,29 @@ NS_ASSUME_NONNULL_BEGIN
 
 #pragma mark - Instance fields
 
-/// Namespace ID. Might be missing due to historical data gap.
+/// Namespace ID.
 @property (nonatomic, readonly, copy, nullable) NSString *nsId;
 
-/// A path relative to the specified namespace ID. Might be missing due to
-/// historical data gap.
+/// A path relative to the specified namespace ID.
 @property (nonatomic, readonly, copy, nullable) NSString *relativePath;
+
+/// True if the namespace is shared.
+@property (nonatomic, readonly, nullable) NSNumber *isSharedNamespace;
 
 #pragma mark - Constructors
 
 ///
 /// Full constructor for the struct (exposes all instance variables).
 ///
-/// @param nsId Namespace ID. Might be missing due to historical data gap.
-/// @param relativePath A path relative to the specified namespace ID. Might be
-/// missing due to historical data gap.
+/// @param nsId Namespace ID.
+/// @param relativePath A path relative to the specified namespace ID.
+/// @param isSharedNamespace True if the namespace is shared.
 ///
 /// @return An initialized instance.
 ///
-- (instancetype)initWithNsId:(nullable NSString *)nsId relativePath:(nullable NSString *)relativePath;
+- (instancetype)initWithNsId:(nullable NSString *)nsId
+                relativePath:(nullable NSString *)relativePath
+           isSharedNamespace:(nullable NSNumber *)isSharedNamespace;
 
 ///
 /// Convenience constructor (exposes only non-nullable instance variables with

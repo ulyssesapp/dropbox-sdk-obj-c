@@ -60,6 +60,7 @@
 #import "DBFILESExportInfo.h"
 #import "DBFILESExportMetadata.h"
 #import "DBFILESExportResult.h"
+#import "DBFILESFileLockMetadata.h"
 #import "DBFILESFileMetadata.h"
 #import "DBFILESFileOpsResult.h"
 #import "DBFILESFileSharingInfo.h"
@@ -79,6 +80,7 @@
 #import "DBFILESGetThumbnailBatchError.h"
 #import "DBFILESGetThumbnailBatchResult.h"
 #import "DBFILESGetThumbnailBatchResultEntry.h"
+#import "DBFILESImportFormat.h"
 #import "DBFILESListFolderArg.h"
 #import "DBFILESListFolderContinueArg.h"
 #import "DBFILESListFolderContinueError.h"
@@ -92,12 +94,30 @@
 #import "DBFILESListRevisionsError.h"
 #import "DBFILESListRevisionsMode.h"
 #import "DBFILESListRevisionsResult.h"
+#import "DBFILESLockConflictError.h"
+#import "DBFILESLockFileArg.h"
+#import "DBFILESLockFileBatchArg.h"
+#import "DBFILESLockFileBatchResult.h"
+#import "DBFILESLockFileError.h"
+#import "DBFILESLockFileResultEntry.h"
 #import "DBFILESLookupError.h"
 #import "DBFILESMediaInfo.h"
 #import "DBFILESMetadata.h"
+#import "DBFILESMinimalFileLinkMetadata.h"
 #import "DBFILESMoveBatchArg.h"
+#import "DBFILESMoveIntoVaultError.h"
+#import "DBFILESPaperContentError.h"
+#import "DBFILESPaperCreateArg.h"
+#import "DBFILESPaperCreateError.h"
+#import "DBFILESPaperCreateResult.h"
+#import "DBFILESPaperDocUpdatePolicy.h"
+#import "DBFILESPaperUpdateArg.h"
+#import "DBFILESPaperUpdateError.h"
+#import "DBFILESPaperUpdateResult.h"
+#import "DBFILESPathOrLink.h"
 #import "DBFILESPreviewArg.h"
 #import "DBFILESPreviewError.h"
+#import "DBFILESPreviewResult.h"
 #import "DBFILESRelocationArg.h"
 #import "DBFILESRelocationBatchArg.h"
 #import "DBFILESRelocationBatchArgBase.h"
@@ -124,8 +144,14 @@
 #import "DBFILESSearchArg.h"
 #import "DBFILESSearchError.h"
 #import "DBFILESSearchMatch.h"
+#import "DBFILESSearchMatchFieldOptions.h"
+#import "DBFILESSearchMatchV2.h"
 #import "DBFILESSearchMode.h"
+#import "DBFILESSearchOptions.h"
 #import "DBFILESSearchResult.h"
+#import "DBFILESSearchV2Arg.h"
+#import "DBFILESSearchV2ContinueArg.h"
+#import "DBFILESSearchV2Result.h"
 #import "DBFILESSharedLink.h"
 #import "DBFILESSymlinkInfo.h"
 #import "DBFILESThumbnailArg.h"
@@ -133,6 +159,10 @@
 #import "DBFILESThumbnailFormat.h"
 #import "DBFILESThumbnailMode.h"
 #import "DBFILESThumbnailSize.h"
+#import "DBFILESThumbnailV2Arg.h"
+#import "DBFILESThumbnailV2Error.h"
+#import "DBFILESUnlockFileArg.h"
+#import "DBFILESUnlockFileBatchArg.h"
 #import "DBFILESUploadError.h"
 #import "DBFILESUploadErrorWithProperties.h"
 #import "DBFILESUploadSessionAppendArg.h"
@@ -146,7 +176,9 @@
 #import "DBFILESUploadSessionLookupError.h"
 #import "DBFILESUploadSessionOffsetError.h"
 #import "DBFILESUploadSessionStartArg.h"
+#import "DBFILESUploadSessionStartError.h"
 #import "DBFILESUploadSessionStartResult.h"
+#import "DBFILESUploadSessionType.h"
 #import "DBFILESUploadWriteFailed.h"
 #import "DBFILESWriteError.h"
 #import "DBFILESWriteMode.h"
@@ -555,6 +587,15 @@
 }
 
 - (DBDownloadUrlTask *)exportUrl:(NSString *)path
+                    exportFormat:(NSString *)exportFormat
+                       overwrite:(BOOL)overwrite
+                     destination:(NSURL *)destination {
+  DBRoute *route = DBFILESRouteObjects.DBFILESExport;
+  DBFILESExportArg *arg = [[DBFILESExportArg alloc] initWithPath:path exportFormat:exportFormat];
+  return [self.client requestDownload:route arg:arg overwrite:overwrite destination:destination];
+}
+
+- (DBDownloadUrlTask *)exportUrl:(NSString *)path
                        overwrite:(BOOL)overwrite
                      destination:(NSURL *)destination
                  byteOffsetStart:(NSNumber *)byteOffsetStart
@@ -569,9 +610,31 @@
                         byteOffsetEnd:byteOffsetEnd];
 }
 
+- (DBDownloadUrlTask *)exportUrl:(NSString *)path
+                    exportFormat:(NSString *)exportFormat
+                       overwrite:(BOOL)overwrite
+                     destination:(NSURL *)destination
+                 byteOffsetStart:(NSNumber *)byteOffsetStart
+                   byteOffsetEnd:(NSNumber *)byteOffsetEnd {
+  DBRoute *route = DBFILESRouteObjects.DBFILESExport;
+  DBFILESExportArg *arg = [[DBFILESExportArg alloc] initWithPath:path exportFormat:exportFormat];
+  return [self.client requestDownload:route
+                                  arg:arg
+                            overwrite:overwrite
+                          destination:destination
+                      byteOffsetStart:byteOffsetStart
+                        byteOffsetEnd:byteOffsetEnd];
+}
+
 - (DBDownloadDataTask *)exportData:(NSString *)path {
   DBRoute *route = DBFILESRouteObjects.DBFILESExport;
   DBFILESExportArg *arg = [[DBFILESExportArg alloc] initWithPath:path];
+  return [self.client requestDownload:route arg:arg];
+}
+
+- (DBDownloadDataTask *)exportData:(NSString *)path exportFormat:(NSString *)exportFormat {
+  DBRoute *route = DBFILESRouteObjects.DBFILESExport;
+  DBFILESExportArg *arg = [[DBFILESExportArg alloc] initWithPath:path exportFormat:exportFormat];
   return [self.client requestDownload:route arg:arg];
 }
 
@@ -581,6 +644,21 @@
   DBRoute *route = DBFILESRouteObjects.DBFILESExport;
   DBFILESExportArg *arg = [[DBFILESExportArg alloc] initWithPath:path];
   return [self.client requestDownload:route arg:arg byteOffsetStart:byteOffsetStart byteOffsetEnd:byteOffsetEnd];
+}
+
+- (DBDownloadDataTask *)exportData:(NSString *)path
+                      exportFormat:(NSString *)exportFormat
+                   byteOffsetStart:(NSNumber *)byteOffsetStart
+                     byteOffsetEnd:(NSNumber *)byteOffsetEnd {
+  DBRoute *route = DBFILESRouteObjects.DBFILESExport;
+  DBFILESExportArg *arg = [[DBFILESExportArg alloc] initWithPath:path exportFormat:exportFormat];
+  return [self.client requestDownload:route arg:arg byteOffsetStart:byteOffsetStart byteOffsetEnd:byteOffsetEnd];
+}
+
+- (DBRpcTask *)getFileLockBatch:(NSArray<DBFILESLockFileArg *> *)entries {
+  DBRoute *route = DBFILESRouteObjects.DBFILESGetFileLockBatch;
+  DBFILESLockFileBatchArg *arg = [[DBFILESLockFileBatchArg alloc] initWithEntries:entries];
+  return [self.client requestRpc:route arg:arg];
 }
 
 - (DBRpcTask *)getMetadata:(NSString *)path {
@@ -781,6 +859,96 @@
   return [self.client requestDownload:route arg:arg byteOffsetStart:byteOffsetStart byteOffsetEnd:byteOffsetEnd];
 }
 
+- (DBDownloadUrlTask *)getThumbnailV2Url:(DBFILESPathOrLink *)resource
+                               overwrite:(BOOL)overwrite
+                             destination:(NSURL *)destination {
+  DBRoute *route = DBFILESRouteObjects.DBFILESGetThumbnailV2;
+  DBFILESThumbnailV2Arg *arg = [[DBFILESThumbnailV2Arg alloc] initWithResource:resource];
+  return [self.client requestDownload:route arg:arg overwrite:overwrite destination:destination];
+}
+
+- (DBDownloadUrlTask *)getThumbnailV2Url:(DBFILESPathOrLink *)resource
+                                  format:(DBFILESThumbnailFormat *)format
+                                    size:(DBFILESThumbnailSize *)size
+                                    mode:(DBFILESThumbnailMode *)mode
+                               overwrite:(BOOL)overwrite
+                             destination:(NSURL *)destination {
+  DBRoute *route = DBFILESRouteObjects.DBFILESGetThumbnailV2;
+  DBFILESThumbnailV2Arg *arg =
+      [[DBFILESThumbnailV2Arg alloc] initWithResource:resource format:format size:size mode:mode];
+  return [self.client requestDownload:route arg:arg overwrite:overwrite destination:destination];
+}
+
+- (DBDownloadUrlTask *)getThumbnailV2Url:(DBFILESPathOrLink *)resource
+                               overwrite:(BOOL)overwrite
+                             destination:(NSURL *)destination
+                         byteOffsetStart:(NSNumber *)byteOffsetStart
+                           byteOffsetEnd:(NSNumber *)byteOffsetEnd {
+  DBRoute *route = DBFILESRouteObjects.DBFILESGetThumbnailV2;
+  DBFILESThumbnailV2Arg *arg = [[DBFILESThumbnailV2Arg alloc] initWithResource:resource];
+  return [self.client requestDownload:route
+                                  arg:arg
+                            overwrite:overwrite
+                          destination:destination
+                      byteOffsetStart:byteOffsetStart
+                        byteOffsetEnd:byteOffsetEnd];
+}
+
+- (DBDownloadUrlTask *)getThumbnailV2Url:(DBFILESPathOrLink *)resource
+                                  format:(DBFILESThumbnailFormat *)format
+                                    size:(DBFILESThumbnailSize *)size
+                                    mode:(DBFILESThumbnailMode *)mode
+                               overwrite:(BOOL)overwrite
+                             destination:(NSURL *)destination
+                         byteOffsetStart:(NSNumber *)byteOffsetStart
+                           byteOffsetEnd:(NSNumber *)byteOffsetEnd {
+  DBRoute *route = DBFILESRouteObjects.DBFILESGetThumbnailV2;
+  DBFILESThumbnailV2Arg *arg =
+      [[DBFILESThumbnailV2Arg alloc] initWithResource:resource format:format size:size mode:mode];
+  return [self.client requestDownload:route
+                                  arg:arg
+                            overwrite:overwrite
+                          destination:destination
+                      byteOffsetStart:byteOffsetStart
+                        byteOffsetEnd:byteOffsetEnd];
+}
+
+- (DBDownloadDataTask *)getThumbnailV2Data:(DBFILESPathOrLink *)resource {
+  DBRoute *route = DBFILESRouteObjects.DBFILESGetThumbnailV2;
+  DBFILESThumbnailV2Arg *arg = [[DBFILESThumbnailV2Arg alloc] initWithResource:resource];
+  return [self.client requestDownload:route arg:arg];
+}
+
+- (DBDownloadDataTask *)getThumbnailV2Data:(DBFILESPathOrLink *)resource
+                                    format:(DBFILESThumbnailFormat *)format
+                                      size:(DBFILESThumbnailSize *)size
+                                      mode:(DBFILESThumbnailMode *)mode {
+  DBRoute *route = DBFILESRouteObjects.DBFILESGetThumbnailV2;
+  DBFILESThumbnailV2Arg *arg =
+      [[DBFILESThumbnailV2Arg alloc] initWithResource:resource format:format size:size mode:mode];
+  return [self.client requestDownload:route arg:arg];
+}
+
+- (DBDownloadDataTask *)getThumbnailV2Data:(DBFILESPathOrLink *)resource
+                           byteOffsetStart:(NSNumber *)byteOffsetStart
+                             byteOffsetEnd:(NSNumber *)byteOffsetEnd {
+  DBRoute *route = DBFILESRouteObjects.DBFILESGetThumbnailV2;
+  DBFILESThumbnailV2Arg *arg = [[DBFILESThumbnailV2Arg alloc] initWithResource:resource];
+  return [self.client requestDownload:route arg:arg byteOffsetStart:byteOffsetStart byteOffsetEnd:byteOffsetEnd];
+}
+
+- (DBDownloadDataTask *)getThumbnailV2Data:(DBFILESPathOrLink *)resource
+                                    format:(DBFILESThumbnailFormat *)format
+                                      size:(DBFILESThumbnailSize *)size
+                                      mode:(DBFILESThumbnailMode *)mode
+                           byteOffsetStart:(NSNumber *)byteOffsetStart
+                             byteOffsetEnd:(NSNumber *)byteOffsetEnd {
+  DBRoute *route = DBFILESRouteObjects.DBFILESGetThumbnailV2;
+  DBFILESThumbnailV2Arg *arg =
+      [[DBFILESThumbnailV2Arg alloc] initWithResource:resource format:format size:size mode:mode];
+  return [self.client requestDownload:route arg:arg byteOffsetStart:byteOffsetStart byteOffsetEnd:byteOffsetEnd];
+}
+
 - (DBRpcTask *)getThumbnailBatch:(NSArray<DBFILESThumbnailArg *> *)entries {
   DBRoute *route = DBFILESRouteObjects.DBFILESGetThumbnailBatch;
   DBFILESGetThumbnailBatchArg *arg = [[DBFILESGetThumbnailBatchArg alloc] initWithEntries:entries];
@@ -877,6 +1045,12 @@
   return [self.client requestRpc:route arg:arg];
 }
 
+- (DBRpcTask *)lockFileBatch:(NSArray<DBFILESLockFileArg *> *)entries {
+  DBRoute *route = DBFILESRouteObjects.DBFILESLockFileBatch;
+  DBFILESLockFileBatchArg *arg = [[DBFILESLockFileBatchArg alloc] initWithEntries:entries];
+  return [self.client requestRpc:route arg:arg];
+}
+
 - (DBRpcTask *)moveV2:(NSString *)fromPath toPath:(NSString *)toPath {
   DBRoute *route = DBFILESRouteObjects.DBFILESMoveV2;
   DBFILESRelocationArg *arg = [[DBFILESRelocationArg alloc] initWithFromPath:fromPath toPath:toPath];
@@ -961,6 +1135,99 @@
   DBRoute *route = DBFILESRouteObjects.DBFILESMoveBatchCheck;
   DBASYNCPollArg *arg = [[DBASYNCPollArg alloc] initWithAsyncJobId:asyncJobId];
   return [self.client requestRpc:route arg:arg];
+}
+
+- (DBUploadTask *)paperCreateUrl:(NSString *)path
+                    importFormat:(DBFILESImportFormat *)importFormat
+                        inputUrl:(NSString *)inputUrl {
+  DBRoute *route = DBFILESRouteObjects.DBFILESPaperCreate;
+  DBFILESPaperCreateArg *arg = [[DBFILESPaperCreateArg alloc] initWithPath:path importFormat:importFormat];
+  return [self.client requestUpload:route arg:arg inputUrl:inputUrl];
+}
+
+- (DBUploadTask *)paperCreateData:(NSString *)path
+                     importFormat:(DBFILESImportFormat *)importFormat
+                        inputData:(NSData *)inputData {
+  DBRoute *route = DBFILESRouteObjects.DBFILESPaperCreate;
+  DBFILESPaperCreateArg *arg = [[DBFILESPaperCreateArg alloc] initWithPath:path importFormat:importFormat];
+  return [self.client requestUpload:route arg:arg inputData:inputData];
+}
+
+- (DBUploadTask *)paperCreateStream:(NSString *)path
+                       importFormat:(DBFILESImportFormat *)importFormat
+                        inputStream:(NSInputStream *)inputStream {
+  DBRoute *route = DBFILESRouteObjects.DBFILESPaperCreate;
+  DBFILESPaperCreateArg *arg = [[DBFILESPaperCreateArg alloc] initWithPath:path importFormat:importFormat];
+  return [self.client requestUpload:route arg:arg inputStream:inputStream];
+}
+
+- (DBUploadTask *)paperUpdateUrl:(NSString *)path
+                    importFormat:(DBFILESImportFormat *)importFormat
+                 docUpdatePolicy:(DBFILESPaperDocUpdatePolicy *)docUpdatePolicy
+                        inputUrl:(NSString *)inputUrl {
+  DBRoute *route = DBFILESRouteObjects.DBFILESPaperUpdate;
+  DBFILESPaperUpdateArg *arg =
+      [[DBFILESPaperUpdateArg alloc] initWithPath:path importFormat:importFormat docUpdatePolicy:docUpdatePolicy];
+  return [self.client requestUpload:route arg:arg inputUrl:inputUrl];
+}
+
+- (DBUploadTask *)paperUpdateUrl:(NSString *)path
+                    importFormat:(DBFILESImportFormat *)importFormat
+                 docUpdatePolicy:(DBFILESPaperDocUpdatePolicy *)docUpdatePolicy
+                   paperRevision:(NSNumber *)paperRevision
+                        inputUrl:(NSString *)inputUrl {
+  DBRoute *route = DBFILESRouteObjects.DBFILESPaperUpdate;
+  DBFILESPaperUpdateArg *arg = [[DBFILESPaperUpdateArg alloc] initWithPath:path
+                                                              importFormat:importFormat
+                                                           docUpdatePolicy:docUpdatePolicy
+                                                             paperRevision:paperRevision];
+  return [self.client requestUpload:route arg:arg inputUrl:inputUrl];
+}
+
+- (DBUploadTask *)paperUpdateData:(NSString *)path
+                     importFormat:(DBFILESImportFormat *)importFormat
+                  docUpdatePolicy:(DBFILESPaperDocUpdatePolicy *)docUpdatePolicy
+                        inputData:(NSData *)inputData {
+  DBRoute *route = DBFILESRouteObjects.DBFILESPaperUpdate;
+  DBFILESPaperUpdateArg *arg =
+      [[DBFILESPaperUpdateArg alloc] initWithPath:path importFormat:importFormat docUpdatePolicy:docUpdatePolicy];
+  return [self.client requestUpload:route arg:arg inputData:inputData];
+}
+
+- (DBUploadTask *)paperUpdateData:(NSString *)path
+                     importFormat:(DBFILESImportFormat *)importFormat
+                  docUpdatePolicy:(DBFILESPaperDocUpdatePolicy *)docUpdatePolicy
+                    paperRevision:(NSNumber *)paperRevision
+                        inputData:(NSData *)inputData {
+  DBRoute *route = DBFILESRouteObjects.DBFILESPaperUpdate;
+  DBFILESPaperUpdateArg *arg = [[DBFILESPaperUpdateArg alloc] initWithPath:path
+                                                              importFormat:importFormat
+                                                           docUpdatePolicy:docUpdatePolicy
+                                                             paperRevision:paperRevision];
+  return [self.client requestUpload:route arg:arg inputData:inputData];
+}
+
+- (DBUploadTask *)paperUpdateStream:(NSString *)path
+                       importFormat:(DBFILESImportFormat *)importFormat
+                    docUpdatePolicy:(DBFILESPaperDocUpdatePolicy *)docUpdatePolicy
+                        inputStream:(NSInputStream *)inputStream {
+  DBRoute *route = DBFILESRouteObjects.DBFILESPaperUpdate;
+  DBFILESPaperUpdateArg *arg =
+      [[DBFILESPaperUpdateArg alloc] initWithPath:path importFormat:importFormat docUpdatePolicy:docUpdatePolicy];
+  return [self.client requestUpload:route arg:arg inputStream:inputStream];
+}
+
+- (DBUploadTask *)paperUpdateStream:(NSString *)path
+                       importFormat:(DBFILESImportFormat *)importFormat
+                    docUpdatePolicy:(DBFILESPaperDocUpdatePolicy *)docUpdatePolicy
+                      paperRevision:(NSNumber *)paperRevision
+                        inputStream:(NSInputStream *)inputStream {
+  DBRoute *route = DBFILESRouteObjects.DBFILESPaperUpdate;
+  DBFILESPaperUpdateArg *arg = [[DBFILESPaperUpdateArg alloc] initWithPath:path
+                                                              importFormat:importFormat
+                                                           docUpdatePolicy:docUpdatePolicy
+                                                             paperRevision:paperRevision];
+  return [self.client requestUpload:route arg:arg inputStream:inputStream];
 }
 
 - (DBRpcTask *)permanentlyDelete:(NSString *)path {
@@ -1049,6 +1316,36 @@
   DBRoute *route = DBFILESRouteObjects.DBFILESSearch;
   DBFILESSearchArg *arg =
       [[DBFILESSearchArg alloc] initWithPath:path query:query start:start maxResults:maxResults mode:mode];
+  return [self.client requestRpc:route arg:arg];
+}
+
+- (DBRpcTask *)searchV2:(NSString *)query {
+  DBRoute *route = DBFILESRouteObjects.DBFILESSearchV2;
+  DBFILESSearchV2Arg *arg = [[DBFILESSearchV2Arg alloc] initWithQuery:query];
+  return [self.client requestRpc:route arg:arg];
+}
+
+- (DBRpcTask *)searchV2:(NSString *)query
+                options:(DBFILESSearchOptions *)options
+      matchFieldOptions:(DBFILESSearchMatchFieldOptions *)matchFieldOptions
+      includeHighlights:(NSNumber *)includeHighlights {
+  DBRoute *route = DBFILESRouteObjects.DBFILESSearchV2;
+  DBFILESSearchV2Arg *arg = [[DBFILESSearchV2Arg alloc] initWithQuery:query
+                                                              options:options
+                                                    matchFieldOptions:matchFieldOptions
+                                                    includeHighlights:includeHighlights];
+  return [self.client requestRpc:route arg:arg];
+}
+
+- (DBRpcTask *)searchContinueV2:(NSString *)cursor {
+  DBRoute *route = DBFILESRouteObjects.DBFILESSearchContinueV2;
+  DBFILESSearchV2ContinueArg *arg = [[DBFILESSearchV2ContinueArg alloc] initWithCursor:cursor];
+  return [self.client requestRpc:route arg:arg];
+}
+
+- (DBRpcTask *)unlockFileBatch:(NSArray<DBFILESUnlockFileArg *> *)entries {
+  DBRoute *route = DBFILESRouteObjects.DBFILESUnlockFileBatch;
+  DBFILESUnlockFileBatchArg *arg = [[DBFILESUnlockFileBatchArg alloc] initWithEntries:entries];
   return [self.client requestRpc:route arg:arg];
 }
 
@@ -1234,9 +1531,12 @@
   return [self.client requestUpload:route arg:arg inputUrl:inputUrl];
 }
 
-- (DBUploadTask *)uploadSessionStartUrl:(NSNumber *)close inputUrl:(NSString *)inputUrl {
+- (DBUploadTask *)uploadSessionStartUrl:(NSNumber *)close
+                            sessionType:(DBFILESUploadSessionType *)sessionType
+                               inputUrl:(NSString *)inputUrl {
   DBRoute *route = DBFILESRouteObjects.DBFILESUploadSessionStart;
-  DBFILESUploadSessionStartArg *arg = [[DBFILESUploadSessionStartArg alloc] initWithClose:close];
+  DBFILESUploadSessionStartArg *arg =
+      [[DBFILESUploadSessionStartArg alloc] initWithClose:close sessionType:sessionType];
   return [self.client requestUpload:route arg:arg inputUrl:inputUrl];
 }
 
@@ -1246,9 +1546,12 @@
   return [self.client requestUpload:route arg:arg inputData:inputData];
 }
 
-- (DBUploadTask *)uploadSessionStartData:(NSNumber *)close inputData:(NSData *)inputData {
+- (DBUploadTask *)uploadSessionStartData:(NSNumber *)close
+                             sessionType:(DBFILESUploadSessionType *)sessionType
+                               inputData:(NSData *)inputData {
   DBRoute *route = DBFILESRouteObjects.DBFILESUploadSessionStart;
-  DBFILESUploadSessionStartArg *arg = [[DBFILESUploadSessionStartArg alloc] initWithClose:close];
+  DBFILESUploadSessionStartArg *arg =
+      [[DBFILESUploadSessionStartArg alloc] initWithClose:close sessionType:sessionType];
   return [self.client requestUpload:route arg:arg inputData:inputData];
 }
 
@@ -1258,9 +1561,12 @@
   return [self.client requestUpload:route arg:arg inputStream:inputStream];
 }
 
-- (DBUploadTask *)uploadSessionStartStream:(NSNumber *)close inputStream:(NSInputStream *)inputStream {
+- (DBUploadTask *)uploadSessionStartStream:(NSNumber *)close
+                               sessionType:(DBFILESUploadSessionType *)sessionType
+                               inputStream:(NSInputStream *)inputStream {
   DBRoute *route = DBFILESRouteObjects.DBFILESUploadSessionStart;
-  DBFILESUploadSessionStartArg *arg = [[DBFILESUploadSessionStartArg alloc] initWithClose:close];
+  DBFILESUploadSessionStartArg *arg =
+      [[DBFILESUploadSessionStartArg alloc] initWithClose:close sessionType:sessionType];
   return [self.client requestUpload:route arg:arg inputStream:inputStream];
 }
 

@@ -29,18 +29,22 @@ NS_ASSUME_NONNULL_BEGIN
 
 /// The `DBFILESRestoreErrorTag` enum type represents the possible tag states
 /// with which the `DBFILESRestoreError` union can exist.
-typedef NS_ENUM(NSInteger, DBFILESRestoreErrorTag) {
-  /// An error occurs when downloading metadata for the file.
-  DBFILESRestoreErrorPathLookup,
+typedef NS_CLOSED_ENUM(NSInteger, DBFILESRestoreErrorTag){
+    /// An error occurs when downloading metadata for the file.
+    DBFILESRestoreErrorPathLookup,
 
-  /// An error occurs when trying to restore the file to that path.
-  DBFILESRestoreErrorPathWrite,
+    /// An error occurs when trying to restore the file to that path.
+    DBFILESRestoreErrorPathWrite,
 
-  /// The revision is invalid. It may not exist.
-  DBFILESRestoreErrorInvalidRevision,
+    /// The revision is invalid. It may not exist or may point to a deleted
+    /// file.
+    DBFILESRestoreErrorInvalidRevision,
 
-  /// (no description).
-  DBFILESRestoreErrorOther,
+    /// The restore is currently executing, but has not yet completed.
+    DBFILESRestoreErrorInProgress,
+
+    /// (no description).
+    DBFILESRestoreErrorOther,
 
 };
 
@@ -88,11 +92,21 @@ typedef NS_ENUM(NSInteger, DBFILESRestoreErrorTag) {
 /// Initializes union class with tag state of "invalid_revision".
 ///
 /// Description of the "invalid_revision" tag state: The revision is invalid. It
-/// may not exist.
+/// may not exist or may point to a deleted file.
 ///
 /// @return An initialized instance.
 ///
 - (instancetype)initWithInvalidRevision;
+
+///
+/// Initializes union class with tag state of "in_progress".
+///
+/// Description of the "in_progress" tag state: The restore is currently
+/// executing, but has not yet completed.
+///
+/// @return An initialized instance.
+///
+- (instancetype)initWithInProgress;
 
 ///
 /// Initializes union class with tag state of "other".
@@ -132,6 +146,13 @@ typedef NS_ENUM(NSInteger, DBFILESRestoreErrorTag) {
 /// @return Whether the union's current tag state has value "invalid_revision".
 ///
 - (BOOL)isInvalidRevision;
+
+///
+/// Retrieves whether the union's current tag state has value "in_progress".
+///
+/// @return Whether the union's current tag state has value "in_progress".
+///
+- (BOOL)isInProgress;
 
 ///
 /// Retrieves whether the union's current tag state has value "other".

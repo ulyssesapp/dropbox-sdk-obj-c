@@ -46,9 +46,9 @@
   return [DBCONTACTSDeleteManualContactsArgSerializer deserialize:dict];
 }
 
-#pragma mark - Description method
+#pragma mark - Debug Description method
 
-- (NSString *)description {
+- (NSString *)debugDescription {
   return [[DBCONTACTSDeleteManualContactsArgSerializer serialize:self] description];
 }
 
@@ -192,9 +192,9 @@
   return [DBCONTACTSDeleteManualContactsErrorSerializer deserialize:dict];
 }
 
-#pragma mark - Description method
+#pragma mark - Debug Description method
 
-- (NSString *)description {
+- (NSString *)debugDescription {
   return [[DBCONTACTSDeleteManualContactsErrorSerializer serialize:self] description];
 }
 
@@ -215,8 +215,10 @@
   switch (_tag) {
   case DBCONTACTSDeleteManualContactsErrorContactsNotFound:
     result = prime * result + [self.contactsNotFound hash];
+    break;
   case DBCONTACTSDeleteManualContactsErrorOther:
     result = prime * result + [[self tagName] hash];
+    break;
   }
 
   return prime * result;

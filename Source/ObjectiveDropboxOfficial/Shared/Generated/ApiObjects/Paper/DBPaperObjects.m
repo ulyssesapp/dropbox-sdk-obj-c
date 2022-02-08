@@ -44,9 +44,9 @@
   return [DBPAPERAddMemberSerializer deserialize:dict];
 }
 
-#pragma mark - Description method
+#pragma mark - Debug Description method
 
-- (NSString *)description {
+- (NSString *)debugDescription {
   return [[DBPAPERAddMemberSerializer serialize:self] description];
 }
 
@@ -152,9 +152,9 @@
   return [DBPAPERRefPaperDocSerializer deserialize:dict];
 }
 
-#pragma mark - Description method
+#pragma mark - Debug Description method
 
-- (NSString *)description {
+- (NSString *)debugDescription {
   return [[DBPAPERRefPaperDocSerializer serialize:self] description];
 }
 
@@ -266,9 +266,9 @@
   return [DBPAPERAddPaperDocUserSerializer deserialize:dict];
 }
 
-#pragma mark - Description method
+#pragma mark - Debug Description method
 
-- (NSString *)description {
+- (NSString *)debugDescription {
   return [[DBPAPERAddPaperDocUserSerializer serialize:self] description];
 }
 
@@ -399,9 +399,9 @@
   return [DBPAPERAddPaperDocUserMemberResultSerializer deserialize:dict];
 }
 
-#pragma mark - Description method
+#pragma mark - Debug Description method
 
-- (NSString *)description {
+- (NSString *)debugDescription {
   return [[DBPAPERAddPaperDocUserMemberResultSerializer serialize:self] description];
 }
 
@@ -617,9 +617,9 @@
   return [DBPAPERAddPaperDocUserResultSerializer deserialize:dict];
 }
 
-#pragma mark - Description method
+#pragma mark - Debug Description method
 
-- (NSString *)description {
+- (NSString *)debugDescription {
   return [[DBPAPERAddPaperDocUserResultSerializer serialize:self] description];
 }
 
@@ -640,20 +640,28 @@
   switch (_tag) {
   case DBPAPERAddPaperDocUserResultSuccess:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBPAPERAddPaperDocUserResultUnknownError:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBPAPERAddPaperDocUserResultSharingOutsideTeamDisabled:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBPAPERAddPaperDocUserResultDailyLimitReached:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBPAPERAddPaperDocUserResultUserIsOwner:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBPAPERAddPaperDocUserResultFailedUserDataRetrieval:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBPAPERAddPaperDocUserResultPermissionAlreadyGranted:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBPAPERAddPaperDocUserResultOther:
     result = prime * result + [[self tagName] hash];
+    break;
   }
 
   return prime * result;
@@ -792,9 +800,9 @@
   return [DBPAPERCursorSerializer deserialize:dict];
 }
 
-#pragma mark - Description method
+#pragma mark - Debug Description method
 
-- (NSString *)description {
+- (NSString *)debugDescription {
   return [[DBPAPERCursorSerializer serialize:self] description];
 }
 
@@ -934,9 +942,9 @@
   return [DBPAPERPaperApiBaseErrorSerializer deserialize:dict];
 }
 
-#pragma mark - Description method
+#pragma mark - Debug Description method
 
-- (NSString *)description {
+- (NSString *)debugDescription {
   return [[DBPAPERPaperApiBaseErrorSerializer serialize:self] description];
 }
 
@@ -957,8 +965,10 @@
   switch (_tag) {
   case DBPAPERPaperApiBaseErrorInsufficientPermissions:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBPAPERPaperApiBaseErrorOther:
     result = prime * result + [[self tagName] hash];
+    break;
   }
 
   return prime * result;
@@ -1100,9 +1110,9 @@
   return [DBPAPERDocLookupErrorSerializer deserialize:dict];
 }
 
-#pragma mark - Description method
+#pragma mark - Debug Description method
 
-- (NSString *)description {
+- (NSString *)debugDescription {
   return [[DBPAPERDocLookupErrorSerializer serialize:self] description];
 }
 
@@ -1123,10 +1133,13 @@
   switch (_tag) {
   case DBPAPERDocLookupErrorInsufficientPermissions:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBPAPERDocLookupErrorOther:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBPAPERDocLookupErrorDocNotFound:
     result = prime * result + [[self tagName] hash];
+    break;
   }
 
   return prime * result;
@@ -1287,9 +1300,9 @@
   return [DBPAPERDocSubscriptionLevelSerializer deserialize:dict];
 }
 
-#pragma mark - Description method
+#pragma mark - Debug Description method
 
-- (NSString *)description {
+- (NSString *)debugDescription {
   return [[DBPAPERDocSubscriptionLevelSerializer serialize:self] description];
 }
 
@@ -1310,12 +1323,16 @@
   switch (_tag) {
   case DBPAPERDocSubscriptionLevelDefault_:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBPAPERDocSubscriptionLevelIgnore:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBPAPERDocSubscriptionLevelEvery:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBPAPERDocSubscriptionLevelNoEmail:
     result = prime * result + [[self tagName] hash];
+    break;
   }
 
   return prime * result;
@@ -1473,9 +1490,9 @@
   return [DBPAPERExportFormatSerializer deserialize:dict];
 }
 
-#pragma mark - Description method
+#pragma mark - Debug Description method
 
-- (NSString *)description {
+- (NSString *)debugDescription {
   return [[DBPAPERExportFormatSerializer serialize:self] description];
 }
 
@@ -1496,10 +1513,13 @@
   switch (_tag) {
   case DBPAPERExportFormatHtml:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBPAPERExportFormatMarkdown:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBPAPERExportFormatOther:
     result = prime * result + [[self tagName] hash];
+    break;
   }
 
   return prime * result;
@@ -1605,9 +1625,9 @@
   return [DBPAPERFolderSerializer deserialize:dict];
 }
 
-#pragma mark - Description method
+#pragma mark - Debug Description method
 
-- (NSString *)description {
+- (NSString *)debugDescription {
   return [[DBPAPERFolderSerializer serialize:self] description];
 }
 
@@ -1739,9 +1759,9 @@
   return [DBPAPERFolderSharingPolicyTypeSerializer deserialize:dict];
 }
 
-#pragma mark - Description method
+#pragma mark - Debug Description method
 
-- (NSString *)description {
+- (NSString *)debugDescription {
   return [[DBPAPERFolderSharingPolicyTypeSerializer serialize:self] description];
 }
 
@@ -1762,8 +1782,10 @@
   switch (_tag) {
   case DBPAPERFolderSharingPolicyTypeTeam:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBPAPERFolderSharingPolicyTypeInviteOnly:
     result = prime * result + [[self tagName] hash];
+    break;
   }
 
   return prime * result;
@@ -1923,9 +1945,9 @@
   return [DBPAPERFolderSubscriptionLevelSerializer deserialize:dict];
 }
 
-#pragma mark - Description method
+#pragma mark - Debug Description method
 
-- (NSString *)description {
+- (NSString *)debugDescription {
   return [[DBPAPERFolderSubscriptionLevelSerializer serialize:self] description];
 }
 
@@ -1946,12 +1968,16 @@
   switch (_tag) {
   case DBPAPERFolderSubscriptionLevelNone:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBPAPERFolderSubscriptionLevelActivityOnly:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBPAPERFolderSubscriptionLevelDailyEmails:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBPAPERFolderSubscriptionLevelWeeklyEmails:
     result = prime * result + [[self tagName] hash];
+    break;
   }
 
   return prime * result;
@@ -2077,9 +2103,9 @@
   return [DBPAPERFoldersContainingPaperDocSerializer deserialize:dict];
 }
 
-#pragma mark - Description method
+#pragma mark - Debug Description method
 
-- (NSString *)description {
+- (NSString *)debugDescription {
   return [[DBPAPERFoldersContainingPaperDocSerializer serialize:self] description];
 }
 
@@ -2264,9 +2290,9 @@
   return [DBPAPERImportFormatSerializer deserialize:dict];
 }
 
-#pragma mark - Description method
+#pragma mark - Debug Description method
 
-- (NSString *)description {
+- (NSString *)debugDescription {
   return [[DBPAPERImportFormatSerializer serialize:self] description];
 }
 
@@ -2287,12 +2313,16 @@
   switch (_tag) {
   case DBPAPERImportFormatHtml:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBPAPERImportFormatMarkdown:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBPAPERImportFormatPlainText:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBPAPERImportFormatOther:
     result = prime * result + [[self tagName] hash];
+    break;
   }
 
   return prime * result;
@@ -2407,9 +2437,9 @@
   return [DBPAPERInviteeInfoWithPermissionLevelSerializer deserialize:dict];
 }
 
-#pragma mark - Description method
+#pragma mark - Debug Description method
 
-- (NSString *)description {
+- (NSString *)debugDescription {
   return [[DBPAPERInviteeInfoWithPermissionLevelSerializer serialize:self] description];
 }
 
@@ -2555,9 +2585,9 @@
   return [DBPAPERListDocsCursorErrorSerializer deserialize:dict];
 }
 
-#pragma mark - Description method
+#pragma mark - Debug Description method
 
-- (NSString *)description {
+- (NSString *)debugDescription {
   return [[DBPAPERListDocsCursorErrorSerializer serialize:self] description];
 }
 
@@ -2578,8 +2608,10 @@
   switch (_tag) {
   case DBPAPERListDocsCursorErrorCursorError:
     result = prime * result + [self.cursorError hash];
+    break;
   case DBPAPERListDocsCursorErrorOther:
     result = prime * result + [[self tagName] hash];
+    break;
   }
 
   return prime * result;
@@ -2692,9 +2724,9 @@
   return [DBPAPERListPaperDocsArgsSerializer deserialize:dict];
 }
 
-#pragma mark - Description method
+#pragma mark - Debug Description method
 
-- (NSString *)description {
+- (NSString *)debugDescription {
   return [[DBPAPERListPaperDocsArgsSerializer serialize:self] description];
 }
 
@@ -2815,9 +2847,9 @@
   return [DBPAPERListPaperDocsContinueArgsSerializer deserialize:dict];
 }
 
-#pragma mark - Description method
+#pragma mark - Debug Description method
 
-- (NSString *)description {
+- (NSString *)debugDescription {
   return [[DBPAPERListPaperDocsContinueArgsSerializer serialize:self] description];
 }
 
@@ -2957,9 +2989,9 @@
   return [DBPAPERListPaperDocsFilterBySerializer deserialize:dict];
 }
 
-#pragma mark - Description method
+#pragma mark - Debug Description method
 
-- (NSString *)description {
+- (NSString *)debugDescription {
   return [[DBPAPERListPaperDocsFilterBySerializer serialize:self] description];
 }
 
@@ -2980,10 +3012,13 @@
   switch (_tag) {
   case DBPAPERListPaperDocsFilterByDocsAccessed:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBPAPERListPaperDocsFilterByDocsCreated:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBPAPERListPaperDocsFilterByOther:
     result = prime * result + [[self tagName] hash];
+    break;
   }
 
   return prime * result;
@@ -3097,9 +3132,9 @@
   return [DBPAPERListPaperDocsResponseSerializer deserialize:dict];
 }
 
-#pragma mark - Description method
+#pragma mark - Debug Description method
 
-- (NSString *)description {
+- (NSString *)debugDescription {
   return [[DBPAPERListPaperDocsResponseSerializer serialize:self] description];
 }
 
@@ -3271,9 +3306,9 @@
   return [DBPAPERListPaperDocsSortBySerializer deserialize:dict];
 }
 
-#pragma mark - Description method
+#pragma mark - Debug Description method
 
-- (NSString *)description {
+- (NSString *)debugDescription {
   return [[DBPAPERListPaperDocsSortBySerializer serialize:self] description];
 }
 
@@ -3294,12 +3329,16 @@
   switch (_tag) {
   case DBPAPERListPaperDocsSortByAccessed:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBPAPERListPaperDocsSortByModified:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBPAPERListPaperDocsSortByCreated:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBPAPERListPaperDocsSortByOther:
     result = prime * result + [[self tagName] hash];
+    break;
   }
 
   return prime * result;
@@ -3452,9 +3491,9 @@
   return [DBPAPERListPaperDocsSortOrderSerializer deserialize:dict];
 }
 
-#pragma mark - Description method
+#pragma mark - Debug Description method
 
-- (NSString *)description {
+- (NSString *)debugDescription {
   return [[DBPAPERListPaperDocsSortOrderSerializer serialize:self] description];
 }
 
@@ -3475,10 +3514,13 @@
   switch (_tag) {
   case DBPAPERListPaperDocsSortOrderAscending:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBPAPERListPaperDocsSortOrderDescending:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBPAPERListPaperDocsSortOrderOther:
     result = prime * result + [[self tagName] hash];
+    break;
   }
 
   return prime * result;
@@ -3652,9 +3694,9 @@
   return [DBPAPERListUsersCursorErrorSerializer deserialize:dict];
 }
 
-#pragma mark - Description method
+#pragma mark - Debug Description method
 
-- (NSString *)description {
+- (NSString *)debugDescription {
   return [[DBPAPERListUsersCursorErrorSerializer serialize:self] description];
 }
 
@@ -3675,12 +3717,16 @@
   switch (_tag) {
   case DBPAPERListUsersCursorErrorInsufficientPermissions:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBPAPERListUsersCursorErrorOther:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBPAPERListUsersCursorErrorDocNotFound:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBPAPERListUsersCursorErrorCursorError:
     result = prime * result + [self.cursorError hash];
+    break;
   }
 
   return prime * result;
@@ -3798,9 +3844,9 @@
   return [DBPAPERListUsersOnFolderArgsSerializer deserialize:dict];
 }
 
-#pragma mark - Description method
+#pragma mark - Debug Description method
 
-- (NSString *)description {
+- (NSString *)debugDescription {
   return [[DBPAPERListUsersOnFolderArgsSerializer serialize:self] description];
 }
 
@@ -3905,9 +3951,9 @@
   return [DBPAPERListUsersOnFolderContinueArgsSerializer deserialize:dict];
 }
 
-#pragma mark - Description method
+#pragma mark - Debug Description method
 
-- (NSString *)description {
+- (NSString *)debugDescription {
   return [[DBPAPERListUsersOnFolderContinueArgsSerializer serialize:self] description];
 }
 
@@ -4028,9 +4074,9 @@
   return [DBPAPERListUsersOnFolderResponseSerializer deserialize:dict];
 }
 
-#pragma mark - Description method
+#pragma mark - Debug Description method
 
-- (NSString *)description {
+- (NSString *)debugDescription {
   return [[DBPAPERListUsersOnFolderResponseSerializer serialize:self] description];
 }
 
@@ -4167,9 +4213,9 @@
   return [DBPAPERListUsersOnPaperDocArgsSerializer deserialize:dict];
 }
 
-#pragma mark - Description method
+#pragma mark - Debug Description method
 
-- (NSString *)description {
+- (NSString *)debugDescription {
   return [[DBPAPERListUsersOnPaperDocArgsSerializer serialize:self] description];
 }
 
@@ -4282,9 +4328,9 @@
   return [DBPAPERListUsersOnPaperDocContinueArgsSerializer deserialize:dict];
 }
 
-#pragma mark - Description method
+#pragma mark - Debug Description method
 
-- (NSString *)description {
+- (NSString *)debugDescription {
   return [[DBPAPERListUsersOnPaperDocContinueArgsSerializer serialize:self] description];
 }
 
@@ -4410,9 +4456,9 @@
   return [DBPAPERListUsersOnPaperDocResponseSerializer deserialize:dict];
 }
 
-#pragma mark - Description method
+#pragma mark - Debug Description method
 
-- (NSString *)description {
+- (NSString *)debugDescription {
   return [[DBPAPERListUsersOnPaperDocResponseSerializer serialize:self] description];
 }
 
@@ -4622,9 +4668,9 @@
   return [DBPAPERPaperApiCursorErrorSerializer deserialize:dict];
 }
 
-#pragma mark - Description method
+#pragma mark - Debug Description method
 
-- (NSString *)description {
+- (NSString *)debugDescription {
   return [[DBPAPERPaperApiCursorErrorSerializer serialize:self] description];
 }
 
@@ -4645,14 +4691,19 @@
   switch (_tag) {
   case DBPAPERPaperApiCursorErrorExpiredCursor:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBPAPERPaperApiCursorErrorInvalidCursor:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBPAPERPaperApiCursorErrorWrongUserInCursor:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBPAPERPaperApiCursorErrorReset:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBPAPERPaperApiCursorErrorOther:
     result = prime * result + [[self tagName] hash];
+    break;
   }
 
   return prime * result;
@@ -4774,9 +4825,9 @@
   return [DBPAPERPaperDocCreateArgsSerializer deserialize:dict];
 }
 
-#pragma mark - Description method
+#pragma mark - Debug Description method
 
-- (NSString *)description {
+- (NSString *)debugDescription {
   return [[DBPAPERPaperDocCreateArgsSerializer serialize:self] description];
 }
 
@@ -4971,9 +5022,9 @@
   return [DBPAPERPaperDocCreateErrorSerializer deserialize:dict];
 }
 
-#pragma mark - Description method
+#pragma mark - Debug Description method
 
-- (NSString *)description {
+- (NSString *)debugDescription {
   return [[DBPAPERPaperDocCreateErrorSerializer serialize:self] description];
 }
 
@@ -4994,16 +5045,22 @@
   switch (_tag) {
   case DBPAPERPaperDocCreateErrorInsufficientPermissions:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBPAPERPaperDocCreateErrorOther:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBPAPERPaperDocCreateErrorContentMalformed:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBPAPERPaperDocCreateErrorFolderNotFound:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBPAPERPaperDocCreateErrorDocLengthExceeded:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBPAPERPaperDocCreateErrorImageSizeExceeded:
     result = prime * result + [[self tagName] hash];
+    break;
   }
 
   return prime * result;
@@ -5129,9 +5186,9 @@
   return [DBPAPERPaperDocCreateUpdateResultSerializer deserialize:dict];
 }
 
-#pragma mark - Description method
+#pragma mark - Debug Description method
 
-- (NSString *)description {
+- (NSString *)debugDescription {
   return [[DBPAPERPaperDocCreateUpdateResultSerializer serialize:self] description];
 }
 
@@ -5243,9 +5300,9 @@
   return [DBPAPERPaperDocExportSerializer deserialize:dict];
 }
 
-#pragma mark - Description method
+#pragma mark - Debug Description method
 
-- (NSString *)description {
+- (NSString *)debugDescription {
   return [[DBPAPERPaperDocExportSerializer serialize:self] description];
 }
 
@@ -5357,9 +5414,9 @@
   return [DBPAPERPaperDocExportResultSerializer deserialize:dict];
 }
 
-#pragma mark - Description method
+#pragma mark - Debug Description method
 
-- (NSString *)description {
+- (NSString *)debugDescription {
   return [[DBPAPERPaperDocExportResultSerializer serialize:self] description];
 }
 
@@ -5517,9 +5574,9 @@
   return [DBPAPERPaperDocPermissionLevelSerializer deserialize:dict];
 }
 
-#pragma mark - Description method
+#pragma mark - Debug Description method
 
-- (NSString *)description {
+- (NSString *)debugDescription {
   return [[DBPAPERPaperDocPermissionLevelSerializer serialize:self] description];
 }
 
@@ -5540,10 +5597,13 @@
   switch (_tag) {
   case DBPAPERPaperDocPermissionLevelEdit:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBPAPERPaperDocPermissionLevelViewAndComment:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBPAPERPaperDocPermissionLevelOther:
     result = prime * result + [[self tagName] hash];
+    break;
   }
 
   return prime * result;
@@ -5650,9 +5710,9 @@
   return [DBPAPERPaperDocSharingPolicySerializer deserialize:dict];
 }
 
-#pragma mark - Description method
+#pragma mark - Debug Description method
 
-- (NSString *)description {
+- (NSString *)debugDescription {
   return [[DBPAPERPaperDocSharingPolicySerializer serialize:self] description];
 }
 
@@ -5766,9 +5826,9 @@
   return [DBPAPERPaperDocUpdateArgsSerializer deserialize:dict];
 }
 
-#pragma mark - Description method
+#pragma mark - Debug Description method
 
-- (NSString *)description {
+- (NSString *)debugDescription {
   return [[DBPAPERPaperDocUpdateArgsSerializer serialize:self] description];
 }
 
@@ -6015,9 +6075,9 @@
   return [DBPAPERPaperDocUpdateErrorSerializer deserialize:dict];
 }
 
-#pragma mark - Description method
+#pragma mark - Debug Description method
 
-- (NSString *)description {
+- (NSString *)debugDescription {
   return [[DBPAPERPaperDocUpdateErrorSerializer serialize:self] description];
 }
 
@@ -6038,22 +6098,31 @@
   switch (_tag) {
   case DBPAPERPaperDocUpdateErrorInsufficientPermissions:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBPAPERPaperDocUpdateErrorOther:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBPAPERPaperDocUpdateErrorDocNotFound:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBPAPERPaperDocUpdateErrorContentMalformed:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBPAPERPaperDocUpdateErrorRevisionMismatch:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBPAPERPaperDocUpdateErrorDocLengthExceeded:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBPAPERPaperDocUpdateErrorImageSizeExceeded:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBPAPERPaperDocUpdateErrorDocArchived:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBPAPERPaperDocUpdateErrorDocDeleted:
     result = prime * result + [[self tagName] hash];
+    break;
   }
 
   return prime * result;
@@ -6250,9 +6319,9 @@
   return [DBPAPERPaperDocUpdatePolicySerializer deserialize:dict];
 }
 
-#pragma mark - Description method
+#pragma mark - Debug Description method
 
-- (NSString *)description {
+- (NSString *)debugDescription {
   return [[DBPAPERPaperDocUpdatePolicySerializer serialize:self] description];
 }
 
@@ -6273,12 +6342,16 @@
   switch (_tag) {
   case DBPAPERPaperDocUpdatePolicyAppend:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBPAPERPaperDocUpdatePolicyPrepend:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBPAPERPaperDocUpdatePolicyOverwriteAll:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBPAPERPaperDocUpdatePolicyOther:
     result = prime * result + [[self tagName] hash];
+    break;
   }
 
   return prime * result;
@@ -6358,6 +6431,437 @@
 
 @end
 
+#import "DBPAPERPaperFolderCreateArg.h"
+#import "DBStoneSerializers.h"
+#import "DBStoneValidators.h"
+
+#pragma mark - API Object
+
+@implementation DBPAPERPaperFolderCreateArg
+
+#pragma mark - Constructors
+
+- (instancetype)initWithName:(NSString *)name
+              parentFolderId:(NSString *)parentFolderId
+                isTeamFolder:(NSNumber *)isTeamFolder {
+  [DBStoneValidators nonnullValidator:nil](name);
+
+  self = [super init];
+  if (self) {
+    _name = name;
+    _parentFolderId = parentFolderId;
+    _isTeamFolder = isTeamFolder;
+  }
+  return self;
+}
+
+- (instancetype)initWithName:(NSString *)name {
+  return [self initWithName:name parentFolderId:nil isTeamFolder:nil];
+}
+
+#pragma mark - Serialization methods
+
++ (nullable NSDictionary<NSString *, id> *)serialize:(id)instance {
+  return [DBPAPERPaperFolderCreateArgSerializer serialize:instance];
+}
+
++ (id)deserialize:(NSDictionary<NSString *, id> *)dict {
+  return [DBPAPERPaperFolderCreateArgSerializer deserialize:dict];
+}
+
+#pragma mark - Debug Description method
+
+- (NSString *)debugDescription {
+  return [[DBPAPERPaperFolderCreateArgSerializer serialize:self] description];
+}
+
+#pragma mark - Copyable method
+
+- (instancetype)copyWithZone:(NSZone *)zone {
+#pragma unused(zone)
+  /// object is immutable
+  return self;
+}
+
+#pragma mark - Hash method
+
+- (NSUInteger)hash {
+  NSUInteger prime = 31;
+  NSUInteger result = 1;
+
+  result = prime * result + [self.name hash];
+  if (self.parentFolderId != nil) {
+    result = prime * result + [self.parentFolderId hash];
+  }
+  if (self.isTeamFolder != nil) {
+    result = prime * result + [self.isTeamFolder hash];
+  }
+
+  return prime * result;
+}
+
+#pragma mark - Equality method
+
+- (BOOL)isEqual:(id)other {
+  if (other == self) {
+    return YES;
+  }
+  if (!other || ![other isKindOfClass:[self class]]) {
+    return NO;
+  }
+  return [self isEqualToPaperFolderCreateArg:other];
+}
+
+- (BOOL)isEqualToPaperFolderCreateArg:(DBPAPERPaperFolderCreateArg *)aPaperFolderCreateArg {
+  if (self == aPaperFolderCreateArg) {
+    return YES;
+  }
+  if (![self.name isEqual:aPaperFolderCreateArg.name]) {
+    return NO;
+  }
+  if (self.parentFolderId) {
+    if (![self.parentFolderId isEqual:aPaperFolderCreateArg.parentFolderId]) {
+      return NO;
+    }
+  }
+  if (self.isTeamFolder) {
+    if (![self.isTeamFolder isEqual:aPaperFolderCreateArg.isTeamFolder]) {
+      return NO;
+    }
+  }
+  return YES;
+}
+
+@end
+
+#pragma mark - Serializer Object
+
+@implementation DBPAPERPaperFolderCreateArgSerializer
+
++ (NSDictionary<NSString *, id> *)serialize:(DBPAPERPaperFolderCreateArg *)valueObj {
+  NSMutableDictionary *jsonDict = [[NSMutableDictionary alloc] init];
+
+  jsonDict[@"name"] = valueObj.name;
+  if (valueObj.parentFolderId) {
+    jsonDict[@"parent_folder_id"] = valueObj.parentFolderId;
+  }
+  if (valueObj.isTeamFolder) {
+    jsonDict[@"is_team_folder"] = valueObj.isTeamFolder;
+  }
+
+  return [jsonDict count] > 0 ? jsonDict : nil;
+}
+
++ (DBPAPERPaperFolderCreateArg *)deserialize:(NSDictionary<NSString *, id> *)valueDict {
+  NSString *name = valueDict[@"name"];
+  NSString *parentFolderId = valueDict[@"parent_folder_id"] ?: nil;
+  NSNumber *isTeamFolder = valueDict[@"is_team_folder"] ?: nil;
+
+  return
+      [[DBPAPERPaperFolderCreateArg alloc] initWithName:name parentFolderId:parentFolderId isTeamFolder:isTeamFolder];
+}
+
+@end
+
+#import "DBPAPERPaperApiBaseError.h"
+#import "DBPAPERPaperFolderCreateError.h"
+#import "DBStoneSerializers.h"
+#import "DBStoneValidators.h"
+
+#pragma mark - API Object
+
+@implementation DBPAPERPaperFolderCreateError
+
+#pragma mark - Constructors
+
+- (instancetype)initWithInsufficientPermissions {
+  self = [super init];
+  if (self) {
+    _tag = DBPAPERPaperFolderCreateErrorInsufficientPermissions;
+  }
+  return self;
+}
+
+- (instancetype)initWithOther {
+  self = [super init];
+  if (self) {
+    _tag = DBPAPERPaperFolderCreateErrorOther;
+  }
+  return self;
+}
+
+- (instancetype)initWithFolderNotFound {
+  self = [super init];
+  if (self) {
+    _tag = DBPAPERPaperFolderCreateErrorFolderNotFound;
+  }
+  return self;
+}
+
+- (instancetype)initWithInvalidFolderId {
+  self = [super init];
+  if (self) {
+    _tag = DBPAPERPaperFolderCreateErrorInvalidFolderId;
+  }
+  return self;
+}
+
+#pragma mark - Instance field accessors
+
+#pragma mark - Tag state methods
+
+- (BOOL)isInsufficientPermissions {
+  return _tag == DBPAPERPaperFolderCreateErrorInsufficientPermissions;
+}
+
+- (BOOL)isOther {
+  return _tag == DBPAPERPaperFolderCreateErrorOther;
+}
+
+- (BOOL)isFolderNotFound {
+  return _tag == DBPAPERPaperFolderCreateErrorFolderNotFound;
+}
+
+- (BOOL)isInvalidFolderId {
+  return _tag == DBPAPERPaperFolderCreateErrorInvalidFolderId;
+}
+
+- (NSString *)tagName {
+  switch (_tag) {
+  case DBPAPERPaperFolderCreateErrorInsufficientPermissions:
+    return @"DBPAPERPaperFolderCreateErrorInsufficientPermissions";
+  case DBPAPERPaperFolderCreateErrorOther:
+    return @"DBPAPERPaperFolderCreateErrorOther";
+  case DBPAPERPaperFolderCreateErrorFolderNotFound:
+    return @"DBPAPERPaperFolderCreateErrorFolderNotFound";
+  case DBPAPERPaperFolderCreateErrorInvalidFolderId:
+    return @"DBPAPERPaperFolderCreateErrorInvalidFolderId";
+  }
+
+  @throw([NSException exceptionWithName:@"InvalidTag" reason:@"Tag has an unknown value." userInfo:nil]);
+}
+
+#pragma mark - Serialization methods
+
++ (nullable NSDictionary<NSString *, id> *)serialize:(id)instance {
+  return [DBPAPERPaperFolderCreateErrorSerializer serialize:instance];
+}
+
++ (id)deserialize:(NSDictionary<NSString *, id> *)dict {
+  return [DBPAPERPaperFolderCreateErrorSerializer deserialize:dict];
+}
+
+#pragma mark - Debug Description method
+
+- (NSString *)debugDescription {
+  return [[DBPAPERPaperFolderCreateErrorSerializer serialize:self] description];
+}
+
+#pragma mark - Copyable method
+
+- (instancetype)copyWithZone:(NSZone *)zone {
+#pragma unused(zone)
+  /// object is immutable
+  return self;
+}
+
+#pragma mark - Hash method
+
+- (NSUInteger)hash {
+  NSUInteger prime = 31;
+  NSUInteger result = 1;
+
+  switch (_tag) {
+  case DBPAPERPaperFolderCreateErrorInsufficientPermissions:
+    result = prime * result + [[self tagName] hash];
+    break;
+  case DBPAPERPaperFolderCreateErrorOther:
+    result = prime * result + [[self tagName] hash];
+    break;
+  case DBPAPERPaperFolderCreateErrorFolderNotFound:
+    result = prime * result + [[self tagName] hash];
+    break;
+  case DBPAPERPaperFolderCreateErrorInvalidFolderId:
+    result = prime * result + [[self tagName] hash];
+    break;
+  }
+
+  return prime * result;
+}
+
+#pragma mark - Equality method
+
+- (BOOL)isEqual:(id)other {
+  if (other == self) {
+    return YES;
+  }
+  if (!other || ![other isKindOfClass:[self class]]) {
+    return NO;
+  }
+  return [self isEqualToPaperFolderCreateError:other];
+}
+
+- (BOOL)isEqualToPaperFolderCreateError:(DBPAPERPaperFolderCreateError *)aPaperFolderCreateError {
+  if (self == aPaperFolderCreateError) {
+    return YES;
+  }
+  if (self.tag != aPaperFolderCreateError.tag) {
+    return NO;
+  }
+  switch (_tag) {
+  case DBPAPERPaperFolderCreateErrorInsufficientPermissions:
+    return [[self tagName] isEqual:[aPaperFolderCreateError tagName]];
+  case DBPAPERPaperFolderCreateErrorOther:
+    return [[self tagName] isEqual:[aPaperFolderCreateError tagName]];
+  case DBPAPERPaperFolderCreateErrorFolderNotFound:
+    return [[self tagName] isEqual:[aPaperFolderCreateError tagName]];
+  case DBPAPERPaperFolderCreateErrorInvalidFolderId:
+    return [[self tagName] isEqual:[aPaperFolderCreateError tagName]];
+  }
+  return YES;
+}
+
+@end
+
+#pragma mark - Serializer Object
+
+@implementation DBPAPERPaperFolderCreateErrorSerializer
+
++ (NSDictionary<NSString *, id> *)serialize:(DBPAPERPaperFolderCreateError *)valueObj {
+  NSMutableDictionary *jsonDict = [[NSMutableDictionary alloc] init];
+
+  if ([valueObj isInsufficientPermissions]) {
+    jsonDict[@".tag"] = @"insufficient_permissions";
+  } else if ([valueObj isOther]) {
+    jsonDict[@".tag"] = @"other";
+  } else if ([valueObj isFolderNotFound]) {
+    jsonDict[@".tag"] = @"folder_not_found";
+  } else if ([valueObj isInvalidFolderId]) {
+    jsonDict[@".tag"] = @"invalid_folder_id";
+  } else {
+    jsonDict[@".tag"] = @"other";
+  }
+
+  return [jsonDict count] > 0 ? jsonDict : nil;
+}
+
++ (DBPAPERPaperFolderCreateError *)deserialize:(NSDictionary<NSString *, id> *)valueDict {
+  NSString *tag = valueDict[@".tag"];
+
+  if ([tag isEqualToString:@"insufficient_permissions"]) {
+    return [[DBPAPERPaperFolderCreateError alloc] initWithInsufficientPermissions];
+  } else if ([tag isEqualToString:@"other"]) {
+    return [[DBPAPERPaperFolderCreateError alloc] initWithOther];
+  } else if ([tag isEqualToString:@"folder_not_found"]) {
+    return [[DBPAPERPaperFolderCreateError alloc] initWithFolderNotFound];
+  } else if ([tag isEqualToString:@"invalid_folder_id"]) {
+    return [[DBPAPERPaperFolderCreateError alloc] initWithInvalidFolderId];
+  } else {
+    return [[DBPAPERPaperFolderCreateError alloc] initWithOther];
+  }
+}
+
+@end
+
+#import "DBPAPERPaperFolderCreateResult.h"
+#import "DBStoneSerializers.h"
+#import "DBStoneValidators.h"
+
+#pragma mark - API Object
+
+@implementation DBPAPERPaperFolderCreateResult
+
+#pragma mark - Constructors
+
+- (instancetype)initWithFolderId:(NSString *)folderId {
+  [DBStoneValidators nonnullValidator:nil](folderId);
+
+  self = [super init];
+  if (self) {
+    _folderId = folderId;
+  }
+  return self;
+}
+
+#pragma mark - Serialization methods
+
++ (nullable NSDictionary<NSString *, id> *)serialize:(id)instance {
+  return [DBPAPERPaperFolderCreateResultSerializer serialize:instance];
+}
+
++ (id)deserialize:(NSDictionary<NSString *, id> *)dict {
+  return [DBPAPERPaperFolderCreateResultSerializer deserialize:dict];
+}
+
+#pragma mark - Debug Description method
+
+- (NSString *)debugDescription {
+  return [[DBPAPERPaperFolderCreateResultSerializer serialize:self] description];
+}
+
+#pragma mark - Copyable method
+
+- (instancetype)copyWithZone:(NSZone *)zone {
+#pragma unused(zone)
+  /// object is immutable
+  return self;
+}
+
+#pragma mark - Hash method
+
+- (NSUInteger)hash {
+  NSUInteger prime = 31;
+  NSUInteger result = 1;
+
+  result = prime * result + [self.folderId hash];
+
+  return prime * result;
+}
+
+#pragma mark - Equality method
+
+- (BOOL)isEqual:(id)other {
+  if (other == self) {
+    return YES;
+  }
+  if (!other || ![other isKindOfClass:[self class]]) {
+    return NO;
+  }
+  return [self isEqualToPaperFolderCreateResult:other];
+}
+
+- (BOOL)isEqualToPaperFolderCreateResult:(DBPAPERPaperFolderCreateResult *)aPaperFolderCreateResult {
+  if (self == aPaperFolderCreateResult) {
+    return YES;
+  }
+  if (![self.folderId isEqual:aPaperFolderCreateResult.folderId]) {
+    return NO;
+  }
+  return YES;
+}
+
+@end
+
+#pragma mark - Serializer Object
+
+@implementation DBPAPERPaperFolderCreateResultSerializer
+
++ (NSDictionary<NSString *, id> *)serialize:(DBPAPERPaperFolderCreateResult *)valueObj {
+  NSMutableDictionary *jsonDict = [[NSMutableDictionary alloc] init];
+
+  jsonDict[@"folder_id"] = valueObj.folderId;
+
+  return [jsonDict count] > 0 ? jsonDict : nil;
+}
+
++ (DBPAPERPaperFolderCreateResult *)deserialize:(NSDictionary<NSString *, id> *)valueDict {
+  NSString *folderId = valueDict[@"folder_id"];
+
+  return [[DBPAPERPaperFolderCreateResult alloc] initWithFolderId:folderId];
+}
+
+@end
+
 #import "DBPAPERRefPaperDoc.h"
 #import "DBPAPERRemovePaperDocUser.h"
 #import "DBSHARINGMemberSelector.h"
@@ -6391,9 +6895,9 @@
   return [DBPAPERRemovePaperDocUserSerializer deserialize:dict];
 }
 
-#pragma mark - Description method
+#pragma mark - Debug Description method
 
-- (NSString *)description {
+- (NSString *)debugDescription {
   return [[DBPAPERRemovePaperDocUserSerializer serialize:self] description];
 }
 
@@ -6503,9 +7007,9 @@
   return [DBPAPERSharingPolicySerializer deserialize:dict];
 }
 
-#pragma mark - Description method
+#pragma mark - Debug Description method
 
-- (NSString *)description {
+- (NSString *)debugDescription {
   return [[DBPAPERSharingPolicySerializer serialize:self] description];
 }
 
@@ -6671,9 +7175,9 @@
   return [DBPAPERSharingTeamPolicyTypeSerializer deserialize:dict];
 }
 
-#pragma mark - Description method
+#pragma mark - Debug Description method
 
-- (NSString *)description {
+- (NSString *)debugDescription {
   return [[DBPAPERSharingTeamPolicyTypeSerializer serialize:self] description];
 }
 
@@ -6694,10 +7198,13 @@
   switch (_tag) {
   case DBPAPERSharingTeamPolicyTypePeopleWithLinkCanEdit:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBPAPERSharingTeamPolicyTypePeopleWithLinkCanViewAndComment:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBPAPERSharingTeamPolicyTypeInviteOnly:
     result = prime * result + [[self tagName] hash];
+    break;
   }
 
   return prime * result;
@@ -6864,9 +7371,9 @@
   return [DBPAPERSharingPublicPolicyTypeSerializer deserialize:dict];
 }
 
-#pragma mark - Description method
+#pragma mark - Debug Description method
 
-- (NSString *)description {
+- (NSString *)debugDescription {
   return [[DBPAPERSharingPublicPolicyTypeSerializer serialize:self] description];
 }
 
@@ -6887,12 +7394,16 @@
   switch (_tag) {
   case DBPAPERSharingPublicPolicyTypePeopleWithLinkCanEdit:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBPAPERSharingPublicPolicyTypePeopleWithLinkCanViewAndComment:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBPAPERSharingPublicPolicyTypeInviteOnly:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBPAPERSharingPublicPolicyTypeDisabled:
     result = prime * result + [[self tagName] hash];
+    break;
   }
 
   return prime * result;
@@ -7012,9 +7523,9 @@
   return [DBPAPERUserInfoWithPermissionLevelSerializer deserialize:dict];
 }
 
-#pragma mark - Description method
+#pragma mark - Debug Description method
 
-- (NSString *)description {
+- (NSString *)debugDescription {
   return [[DBPAPERUserInfoWithPermissionLevelSerializer serialize:self] description];
 }
 
@@ -7161,9 +7672,9 @@
   return [DBPAPERUserOnPaperDocFilterSerializer deserialize:dict];
 }
 
-#pragma mark - Description method
+#pragma mark - Debug Description method
 
-- (NSString *)description {
+- (NSString *)debugDescription {
   return [[DBPAPERUserOnPaperDocFilterSerializer serialize:self] description];
 }
 
@@ -7184,10 +7695,13 @@
   switch (_tag) {
   case DBPAPERUserOnPaperDocFilterVisited:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBPAPERUserOnPaperDocFilterShared:
     result = prime * result + [[self tagName] hash];
+    break;
   case DBPAPERUserOnPaperDocFilterOther:
     result = prime * result + [[self tagName] hash];
+    break;
   }
 
   return prime * result;

@@ -30,10 +30,14 @@ NS_ASSUME_NONNULL_BEGIN
 ///
 @interface DBTask : NSObject {
 @protected
-  /// Information about the route to which the request was made.
-  DBRoute *_route;
   NSOperationQueue *_queue;
 }
+
+/// Information about the route to which the request was made.
+@property (nonatomic, readonly) DBRoute *route;
+
+/// A unique string identifier for this task.
+@property (nonatomic, readonly, copy) NSString *taskIdentifier;
 
 /// Tracks the number of times this task has been retried.
 @property (nonatomic) int retryCount;

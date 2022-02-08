@@ -28,12 +28,15 @@ NS_ASSUME_NONNULL_BEGIN
 /// The `DBTEAMLOGTrustedNonTeamMemberTypeTag` enum type represents the possible
 /// tag states with which the `DBTEAMLOGTrustedNonTeamMemberType` union can
 /// exist.
-typedef NS_ENUM(NSInteger, DBTEAMLOGTrustedNonTeamMemberTypeTag) {
-  /// (no description).
-  DBTEAMLOGTrustedNonTeamMemberTypeMultiInstanceAdmin,
+typedef NS_CLOSED_ENUM(NSInteger, DBTEAMLOGTrustedNonTeamMemberTypeTag){
+    /// (no description).
+    DBTEAMLOGTrustedNonTeamMemberTypeEnterpriseAdmin,
 
-  /// (no description).
-  DBTEAMLOGTrustedNonTeamMemberTypeOther,
+    /// (no description).
+    DBTEAMLOGTrustedNonTeamMemberTypeMultiInstanceAdmin,
+
+    /// (no description).
+    DBTEAMLOGTrustedNonTeamMemberTypeOther,
 
 };
 
@@ -41,6 +44,13 @@ typedef NS_ENUM(NSInteger, DBTEAMLOGTrustedNonTeamMemberTypeTag) {
 @property (nonatomic, readonly) DBTEAMLOGTrustedNonTeamMemberTypeTag tag;
 
 #pragma mark - Constructors
+
+///
+/// Initializes union class with tag state of "enterprise_admin".
+///
+/// @return An initialized instance.
+///
+- (instancetype)initWithEnterpriseAdmin;
 
 ///
 /// Initializes union class with tag state of "multi_instance_admin".
@@ -59,6 +69,14 @@ typedef NS_ENUM(NSInteger, DBTEAMLOGTrustedNonTeamMemberTypeTag) {
 - (instancetype)init NS_UNAVAILABLE;
 
 #pragma mark - Tag state methods
+
+///
+/// Retrieves whether the union's current tag state has value
+/// "enterprise_admin".
+///
+/// @return Whether the union's current tag state has value "enterprise_admin".
+///
+- (BOOL)isEnterpriseAdmin;
 
 ///
 /// Retrieves whether the union's current tag state has value
