@@ -65,7 +65,7 @@ static NSString *kDBOpenURLAppDropboxEMM = @"DropboxEMM";
   }
   NSDictionary *pasteboardDictionary = nil;
   if (valuesArray) {
-    pasteboardDictionary = [NSKeyedUnarchiver unarchiveObjectWithData:valuesArray[0]];
+    pasteboardDictionary = [NSKeyedUnarchiver unarchivedObjectOfClass:NSDictionary.class fromData:valuesArray[0] error:NULL];
   }
 
   if (pasteboardDictionary && [pasteboardDictionary valueForKey:@"path"] &&
