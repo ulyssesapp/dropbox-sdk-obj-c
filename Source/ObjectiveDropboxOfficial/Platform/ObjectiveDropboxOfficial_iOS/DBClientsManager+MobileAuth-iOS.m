@@ -16,26 +16,14 @@
 + (void)authorizeFromController:(UIApplication *)sharedApplication
                      controller:(UIViewController *)controller
                         openURL:(void (^_Nonnull)(NSURL *))openURL {
-	[self authorizeFromController:sharedApplication controller:controller openURL:openURL presentationHandler:nil dismissalHandler:nil useBrowserAuth:NO];
-}
-
-+ (void)authorizeFromController:(UIApplication *)sharedApplication
-					 controller:(nullable UIViewController *)controller
-						openURL:(void (^_Nonnull)(NSURL *))openURL
-			presentationHandler:(void (^_Nullable)(UIViewController *))presentationHandler
-			   dismissalHandler:(void(^_Nullable)(BOOL, UIViewController *))dismissalHandler
-				 useBrowserAuth:(BOOL)useBrowserAuth {
-	NSAssert([DBOAuthManager sharedOAuthManager] != nil,
-			 @"Call `Dropbox.setupWithAppKey` or `Dropbox.setupWithTeamAppKey` before calling this method");
-	DBMobileSharedApplication *sharedMobileApplication =
-	[[DBMobileSharedApplication alloc] initWithSharedApplication:sharedApplication
-													  controller:controller
-														 openURL:openURL
-											 presentationHandler:presentationHandler
-												dismissalHandler:dismissalHandler
-												  useBrowserAuth:useBrowserAuth];
-	[DBMobileSharedApplication setMobileSharedApplication:sharedMobileApplication];
-	[[DBOAuthManager sharedOAuthManager] authorizeFromSharedApplication:sharedMobileApplication];
+  NSAssert([DBOAuthManager sharedOAuthManager] != nil,
+           @"Call `Dropbox.setupWithAppKey` or `Dropbox.setupWithTeamAppKey` before calling this method");
+  DBMobileSharedApplication *sharedMobileApplication =
+      [[DBMobileSharedApplication alloc] initWithSharedApplication:sharedApplication
+                                                        controller:controller
+                                                           openURL:openURL];
+  [DBMobileSharedApplication setMobileSharedApplication:sharedMobileApplication];
+  [[DBOAuthManager sharedOAuthManager] authorizeFromSharedApplication:sharedMobileApplication];
 }
 
 + (void)setupWithAppKey:(NSString *)appKey {
